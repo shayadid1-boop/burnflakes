@@ -1,6 +1,6 @@
 # ברנפלקס — תוכנית עבודה (גאנט) · MVP
 
-עודכן: 10.9.2026 · אירוע: נובמבר 2026 · קצב: כמעט כל יום · איפיון: `docs/burnflakes-spec-v2.md`
+עודכן: 10.9.2026 (ערב) · אירוע: נובמבר 2026 · קצב: כמעט כל יום · איפיון: `docs/burnflakes-spec-v2.md`
 כל משימה מסומנת בקוד (w = שבוע, t = משימה). סטטוס: ⬜ לא התחיל · 🔵 בעבודה · ✅ הושלם ואושר בבדיקה ידנית.
 כל שבוע נסגר ב**בדיקת הצלחה** אחת. כל משימה: מה, איפה, מי, איך יודעים שהיא גמורה.
 
@@ -31,11 +31,11 @@ gantt
 
 | קוד | משימה | איפה | מי | גמור כש… | סטטוס |
 |---|---|---|---|---|---|
-| w0t1 | פתיחת התיקייה `camp planner` בקורסר | Cursor → File → Open Folder | שי | רואים docs ו‑supabase בצד | ⬜ |
-| w0t2 | קובץ הוראות לקורסר + מבנה ריפו (README, .gitignore) | Claude כותב לתיקייה | Claude | הקבצים בתיקייה, שי רואה אותם בקורסר | ⬜ |
-| w0t3 | ריפו פרטי `burnflakes` בגיטהאב ודחיפה ראשונה | GitHub Desktop → Add Local Repository → Publish | שי | הקבצים נראים ב‑github.com | ⬜ |
-| w0t4 | פרויקט Supabase חדש `burnflakes` (אזור EU) | דפדפן → supabase.com | שי | יש URL ו‑anon key; שמורים במנהל הסיסמאות | ⬜ |
-| w0t5 | הרצת `schema.sql` ושלושת ה‑seed בענן | Supabase → SQL Editor | שי (Claude מלווה) | `select count(*) from members` = 51 | ⬜ |
+| w0t1 | פתיחת התיקייה `camp planner` בקורסר | Cursor → File → Open Folder | שי | רואים docs ו‑supabase בצד | ✅ |
+| w0t2 | קובץ הוראות לקורסר + מבנה ריפו (README, .gitignore) | Claude כותב לתיקייה | Claude | הקבצים בתיקייה, שי רואה אותם בקורסר | ✅ |
+| w0t3 | ריפו פרטי `burnflakes` בגיטהאב; Claude דוחף מה‑Mac (`$HOME/bfwork`) | GitHub API + git | Claude | הקבצים נראים ב‑github.com | ✅ |
+| w0t4 | פרויקט Supabase חדש `burnflakes` (אזור EU) | דפדפן → supabase.com | שי | יש URL ו‑anon key; שמורים במנהל הסיסמאות | ✅ |
+| w0t5 | צינור מיגרציות: `supabase/migrations/*.sql` רץ אוטומטית ב‑GitHub Actions מול Supabase (סוד `SUPABASE_DB_URL`) | GitHub Actions `db-migrate` | Claude | members = 51, shifts = 33, תרחיש 2025 = 44,390 | ✅ |
 | w0t6 | פרויקט Vercel מחובר לריפו | דפדפן → vercel.com → Import | שי | כתובת https של האפליקציה (עדיין ריקה) | ⬜ |
 
 ## שבוע 1 · תשתית ותרחישים (14–20.9) — בדיקת הצלחה: תרחיש 2025 מציג 44,390 ₪; ראש מטבח בחשבון אמיתי רואה רק מטבח
@@ -86,4 +86,5 @@ gantt
 תזכורות וואטסאפ · קליטת תשלומים אוטומטית · החלפת משמרות · קמפים נוספים · העלאת קבלות אם יתברר שצריך.
 
 ## יומן החלטות
+10.9.2026 — שינוי סכמה = קובץ מיגרציה חדש `supabase/migrations/NNNN_*.sql`; דחיפה ל‑main מריצה אותו אוטומטית בענן. Claude דוחף ומריץ, שי מאשר בתצוגה חיה.
 7.9.2026 — 16 החלטות עסקיות נסגרו (ראו איפיון v1.3 סעיף 9) + סבב "מה מורידים" (איפיון v2).
