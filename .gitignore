@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.env
+.env.local
+.env*.local
+.DS_Store
+*.log
+.vercel
+
+# Cowork session outputs (not part of the app)
+Claude outputs/

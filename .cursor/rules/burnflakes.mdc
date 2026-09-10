@@ -1,0 +1,23 @@
+---
+description: Burnflakes camp budget system — project rules for every task
+alwaysApply: true
+---
+# Burnflakes — כללי עבודה לקורסר
+
+## מה הפרויקט
+מערכת ניהול תקציב ומשמרות לקמפ ברנפלקס במידברן. האיפיון המחייב: `docs/burnflakes-spec-v2.md`.
+מבנה הנתונים והלוגיקה: `supabase/schema.sql` (Postgres). נתוני אמת: `supabase/seed/*.sql`.
+תוכנית העבודה והמשימה הנוכחית: `docs/WORK_PLAN.md`.
+
+## כללים
+1. לפני כל משימה קרא את `docs/burnflakes-spec-v2.md` ואת החלק הרלוונטי ב‑`supabase/schema.sql`. אל תמציא טבלאות או עמודות — הסכמה היא מקור האמת.
+2. **הלוגיקה חיה במסד הנתונים.** סיכומים, יתרות, דמי קמפ, מאזן — קוראים מה‑views ומה‑RPC (`compute_scenario`, `approve_scenario`, `v_member_ledger`, `v_scenario_summary`, `v_department_budget_vs_actual`, `v_management_dashboard`, `v_event_balance`, `v_fundraiser_net`, `v_shift_board`). אין חישוב כספי ב‑TypeScript.
+3. שינוי בסכמה = קובץ מיגרציה חדש ב‑`supabase/migrations/` (לא עריכה של schema.sql) + מדיניות RLS + רענון טיפוסים.
+4. עברית RTL בכל מסך: `dir="rtl"` בשורש, מספרים ב‑`tabular-nums`, מטבע ₪, שמות באנגלית רק בקוד.
+5. סטאק: Next.js (App Router) + TypeScript + Tailwind + shadcn/ui + Supabase (auth, RLS). אין ספריות נוספות בלי סיבה.
+6. נייד קודם: רישום הוצאה, הרשמה למשמרת ו"החשבון שלי" חייבים לעבוד מצוין ב‑390px.
+7. בכל מסך ברור מה מוצג ומה קרה: כותרת עם שם האירוע/המחלקה, והודעה צפה אחרי כל שמירה.
+8. הרשאות: שלושה תפקידים — admin, dept_lead, member. חבר רואה רק את עצמו; ראש מחלקה רק את מחלקתו. RLS בצד השרת, לא רק הסתרה ב‑UI.
+9. אל תמחק ואל תשנה נתוני seed. אל תריץ reset על מסד הנתונים בענן. סודות רק ב‑`.env.local` (לא בגיט).
+10. צעדים קטנים: משימה אחת מהגאנט, בדיקה אחת, commit אחד עם קוד המשימה בהודעה (למשל `w1t4: scenario builder`).
+11. כשמשהו לא ברור באיפיון — עצור ושאל, אל תנחש.

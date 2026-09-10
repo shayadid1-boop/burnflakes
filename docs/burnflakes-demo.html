@@ -1,0 +1,505 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>תקציב ברנפלקס</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#F4F2EC; --surface:#FFFFFF; --surface2:#EDEAE2; --ink:#1E2229; --muted:#6B7078; --line:#DCD9D0;
+  --accent:#B8741A; --accent-ink:#7A4B0C; --accent-soft:#F6E7CF;
+  --plan:#4453A6; --plan-soft:#E3E6F6;
+  --good:#2E7D4F; --good-soft:#DDF0E4; --bad:#B4321E; --bad-soft:#F8DDD8; --warn:#9A6A00; --warn-soft:#FBEFC8;
+  --radius:10px; --shadow:0 1px 2px rgba(30,34,41,.06),0 8px 24px -12px rgba(30,34,41,.18);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#151719; --surface:#1E2126; --surface2:#262A31; --ink:#E8E4DA; --muted:#9AA0A8; --line:#30343C;
+  --accent:#E2A345; --accent-ink:#F3C77C; --accent-soft:#3A2D14;
+  --plan:#8B96E0; --plan-soft:#262B47;
+  --good:#5FBF88; --good-soft:#173324; --bad:#F08A78; --bad-soft:#3D1A14; --warn:#E5B94A; --warn-soft:#3A2F0E;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}}
+:root[data-theme="dark"]{
+  --bg:#151719; --surface:#1E2126; --surface2:#262A31; --ink:#E8E4DA; --muted:#9AA0A8; --line:#30343C;
+  --accent:#E2A345; --accent-ink:#F3C77C; --accent-soft:#3A2D14;
+  --plan:#8B96E0; --plan-soft:#262B47;
+  --good:#5FBF88; --good-soft:#173324; --bad:#F08A78; --bad-soft:#3D1A14; --warn:#E5B94A; --warn-soft:#3A2F0E;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{direction:rtl}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Assistant",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:"Frank Ruhl Libre","Times New Roman",serif;font-weight:700;margin:0;text-wrap:balance;line-height:1.2}
+h1{font-size:26px} h2{font-size:22px} h3{font-size:17px}
+.en{direction:ltr;unicode-bidi:isolate;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;background:var(--surface2);padding:1px 6px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 60px}
+header.top{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:22px 0 10px;flex-wrap:wrap}
+header.top .brand{display:flex;align-items:baseline;gap:12px}
+header.top .brand small{color:var(--muted);font-size:14px}
+.demo-tag{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);padding:3px 10px;border-radius:999px;font-weight:700}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:22px;overflow-x:auto}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs button:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section.module{display:none}
+section.module.active{display:block}
+.intro{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap}
+.intro p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+.side{grid-template-columns:320px 1fr}
+@media (max-width:860px){.g2,.g3,.g4,.side{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.panel.lift{box-shadow:var(--shadow)}
+.panel h3{margin-bottom:10px}
+.kpi{display:flex;flex-direction:column;gap:4px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.kpi .label{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.kpi .value{font-family:"Frank Ruhl Libre",serif;font-size:28px;font-weight:700;line-height:1.1}
+.kpi .sub{font-size:13px;color:var(--muted)}
+.kpi.accent{background:var(--accent-soft);border-color:transparent}
+.kpi.accent .value{color:var(--accent-ink)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700}
+td.num,th.num{text-align:left;direction:ltr;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.total td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0}
+tr.dept-row{cursor:pointer}
+tr.dept-row:hover td{background:var(--surface2)}
+tr.sub td{background:var(--surface2);color:var(--muted);font-size:13px;padding:5px 10px 5px 24px}
+.tbl-wrap{overflow-x:auto}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.plan{background:var(--plan-soft);color:var(--plan)} .pill.muted{background:var(--surface2);color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.field label{font-weight:600;font-size:14px}
+.field .hint{font-size:12px;color:var(--muted)}
+.field input[type=range]{width:100%;accent-color:var(--accent)}
+.field select,.field input[type=number],.field input[type=text]{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:100%}
+.rangehead{display:flex;justify-content:space-between;align-items:baseline}
+.rangehead b{font-family:"Frank Ruhl Libre",serif;font-size:20px;color:var(--accent-ink)}
+.btn{font:inherit;font-weight:700;padding:8px 14px;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.small{padding:5px 10px;font-size:13px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.bar{height:10px;background:var(--surface2);border-radius:999px;overflow:hidden;position:relative}
+.bar i{display:block;height:100%;background:var(--plan);border-radius:999px}
+.bar i.over{background:var(--bad)}
+.bar b{position:absolute;top:-3px;width:2px;height:16px;background:var(--ink)}
+.cmp{display:grid;grid-template-columns:1fr auto auto auto;gap:6px 14px;align-items:baseline;font-size:14px}
+.cmp .h{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.cmp .n{direction:ltr;text-align:left}
+.cmp .diff.up{color:var(--bad)} .cmp .diff.down{color:var(--good)}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);margin-bottom:8px}
+.alert .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex:none}
+.alert.bad .dot{background:var(--bad)} .alert.warn .dot{background:var(--warn)} .alert.good .dot{background:var(--good)}
+.alert small{color:var(--muted);display:block}
+.chart{width:100%;height:auto}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-left:5px;vertical-align:-1px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.note{font-size:13px;color:var(--muted);margin-top:10px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filters button{font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.detail{background:var(--surface2);border-radius:8px;padding:12px 14px;margin-top:12px}
+.detail dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0}
+.detail dt{color:var(--muted)} .detail dd{margin:0;direction:ltr;text-align:left}
+.formula{font-size:13px;background:var(--surface2);border-radius:8px;padding:10px 12px;line-height:1.7}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style></head><body><div class="wrap">
+<header class="top">
+  <div class="brand">
+    <h1>תקציב ברנפלקס</h1>
+    <small>מידברן 2025 · נתונים אמיתיים מהגיליון</small>
+  </div>
+  <span class="demo-tag">דמו · לפני פיתוח</span>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="scen">בונה תרחישים</button>
+  <button role="tab" aria-selected="false" data-tab="dept">מסך מחלקה</button>
+  <button role="tab" aria-selected="false" data-tab="ledger">חשבון חברים</button>
+  <button role="tab" aria-selected="false" data-tab="mgmt">לוח ניהול</button>
+</nav>
+
+<!-- ===================== SCENARIO BUILDER ===================== -->
+<section class="module active" id="tab-scen">
+  <div class="intro">
+    <div>
+      <h2>בונה תרחישים</h2>
+      <p>מזיזים את הכפתורים משמאל, וכל 43 הסעיפים של 2025 מתחשבים מחדש. הכפתורים בהתחלה עומדים על הערכים של ההערכה הראשונית של 2025, אז המספר הראשון שתראה הוא 44,390 ₪ — בדיוק כמו בגיליון.</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn small" id="btn-reset">חזרה ל‑2025</button>
+      <button class="btn small" id="btn-preset">נסה: 50 חברים, מפרשים, גיפט מושקע</button>
+    </div>
+  </div>
+
+  <div class="grid side">
+    <div class="panel lift" id="params"></div>
+    <div>
+      <div class="grid g3" style="margin-bottom:16px">
+        <div class="kpi accent"><span class="label">דמי קמפ לחבר</span><span class="value" id="k-dues">–</span><span class="sub" id="k-dues-sub"></span></div>
+        <div class="kpi"><span class="label">סה"כ תרחיש</span><span class="value" id="k-total">–</span><span class="sub" id="k-total-sub"></span></div>
+        <div class="kpi"><span class="label">מול הערכת 2025</span><span class="value" id="k-diff">–</span><span class="sub">44,390 ₪ · 35 חברים</span></div>
+      </div>
+      <div class="panel">
+        <h3>לפי מחלקה <span class="note" style="display:inline">· לחיצה על מחלקה פותחת את הסעיפים</span></h3>
+        <div class="tbl-wrap"><table id="scen-table"></table></div>
+      </div>
+      <div class="panel" style="margin-top:16px">
+        <h3>איך זה מחושב</h3>
+        <div class="formula">
+          לכל סעיף בקטלוג: <b>כמות × מחיר ליחידה</b>.<br>
+          הכמות באה מ"מנוע": קבוע · לפי חבר (קורנפלקס, חלב, סבון) · לפי מ"ר (רשת צל: 15.65 ₪ למ"ר) · לפי ארוחה (ערב 400 ₪, בוקר 300 ₪).<br>
+          סעיף עם תנאי נכנס רק כשהתנאי מתקיים (רשת צל רק אם סוג ההצללה = רשת). אפשרות יכולה לשנות מחיר (גיפט מושקע = ×1.6).<br>
+          דמי קמפ = (סה"כ + רזרבה) ÷ מספר החברים.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DEPARTMENT ===================== -->
+<section class="module" id="tab-dept">
+  <div class="intro">
+    <div>
+      <h2>מסך מחלקה</h2>
+      <p>מה שראש מחלקה רואה כשהוא נכנס: התקציב המאושר של המחלקה שלו בלבד, מה כבר הוצא מולו, בקשות רכש, ורישום הוצאה. במערכת האמיתית הבחירה כאן היא אוטומטית לפי המשתמש המחובר.</p>
+    </div>
+    <div class="field" style="min-width:220px;margin:0">
+      <label for="dept-select">מחובר כראש מחלקת</label>
+      <select id="dept-select"></select>
+    </div>
+  </div>
+
+  <div class="grid g4" style="margin-bottom:16px" id="dept-kpis"></div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <h3>תקציב מול בפועל</h3>
+      <div class="tbl-wrap"><table id="dept-table"></table></div>
+      <p class="note">"מתוכנן" = ההערכה הראשונית של 2025. "בפועל" = גיליון תקציב בפועל. שורה בלי מתוכנן היא הוצאה שלא הייתה בתכנון.</p>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:16px">
+        <h3>בקשות רכש</h3>
+        <div class="tbl-wrap"><table id="req-table"></table></div>
+        <p class="note">בקשות הן דוגמה. הזרימה: ראש מחלקה פותח → מנהל הקמפ מאשר / דוחה → נרשמת הוצאה מולה.</p>
+      </div>
+      <div class="panel lift">
+        <h3>רישום הוצאה חדשה</h3>
+        <div class="field"><label for="x-desc">מה נקנה</label><input type="text" id="x-desc" placeholder="למשל: 6 שקיות קרח"></div>
+        <div class="grid g2">
+          <div class="field"><label for="x-amount">סכום (₪)</label><input type="number" id="x-amount" min="0" placeholder="0"></div>
+          <div class="field"><label for="x-who">מי שילם מהכיס</label><select id="x-who"></select></div>
+        </div>
+        <div class="field"><label for="x-line">מול איזה סעיף</label><select id="x-line"></select></div>
+        <div class="btn-row"><button class="btn primary" id="x-add">רשום הוצאה</button><span class="note" style="margin:0;align-self:center">ההוצאה מתעדכנת מיד גם בחשבון של מי ששילם ובלוח הניהול</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LEDGER ===================== -->
+<section class="module" id="tab-ledger">
+  <div class="intro">
+    <div>
+      <h2>חשבון חברים</h2>
+      <p>גיליון "תשלומים" של 2025, מחושב אוטומטית. לכל חבר: כמה הוא אמור לשלם (דמי קמפ 1,350 + מחסן 275), כמה העביר, כמה הוציא מהכיס, החלק שלו בעודף — והשורה התחתונה: חייב או מגיע לו החזר.</p>
+    </div>
+  </div>
+
+  <div class="grid g4" style="margin-bottom:16px" id="ledger-kpis"></div>
+
+  <div class="panel">
+    <div class="filters" id="ledger-filters">
+      <button aria-pressed="true" data-f="all">כולם</button>
+      <button aria-pressed="false" data-f="refund">מגיע להם החזר</button>
+      <button aria-pressed="false" data-f="owes">חייבים</button>
+      <button aria-pressed="false" data-f="fronted">הוציאו מהכיס</button>
+    </div>
+    <div class="tbl-wrap"><table id="ledger-table"></table></div>
+    <div class="detail" id="ledger-detail" hidden></div>
+    <p class="note">הנוסחה: יתרה = חוב − שילם − הוציא מהכיס − חלק בעודף. שלילי = הקמפ מחזיר לחבר. עינת עם חלק השתתפות 0.81 (1,100 מתוך 1,350) — ולכן גם חלק קטן יותר בעודף. הפערים הקטנים מול הגיליון המקורי הם ייבוא שעוד לא הותאם ידנית (שבוע 1 בתוכנית).</p>
+  </div>
+</section>
+
+<!-- ===================== MANAGEMENT ===================== -->
+<section class="module" id="tab-mgmt">
+  <div class="intro">
+    <div>
+      <h2>לוח ניהול</h2>
+      <p>המבט שלך: כמה נגבה, כמה הוצא, איפה חורגים, ומה דורש טיפול עכשיו. הכל נגזר מאותן טבלאות — אין כאן מספר שמוקלד ידנית.</p>
+    </div>
+  </div>
+
+  <div class="grid g4" style="margin-bottom:16px" id="mgmt-kpis"></div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <h3>תקציב מול בפועל, לפי מחלקה</h3>
+      <svg class="chart" id="mgmt-chart" viewBox="0 0 560 300" direction="ltr" style="direction:ltr" role="img" aria-label="תקציב מול בפועל לפי מחלקה"></svg>
+      <div class="legend"><span><i style="background:var(--plan)"></i>מתוכנן (הערכה 2025)</span><span><i style="background:var(--accent)"></i>בפועל</span></div>
+    </div>
+    <div class="panel">
+      <h3>דורש טיפול</h3>
+      <div id="alerts"></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3>תזרים</h3>
+    <div class="grid g3" id="cash"></div>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script type="application/json" id="data">{"departments" : [{"slug" : "logistics", "name" : "לוגיסטיקה / הקמות"}, {"slug" : "kitchen", "name" : "מטבח"}, {"slug" : "art", "name" : "ארט"}, {"slug" : "gift", "name" : "גיפט"}, {"slug" : "showers", "name" : "שירוקלחת (שירותים ומקלחות)"}, {"slug" : "installation", "name" : "מיצג / חדר ילדים"}, {"slug" : "misc", "name" : "שונות"}], "cost_items" : [{"dept" : "logistics", "name" : "מחסן", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 0.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "הובלה", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 7000.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "השכרת מקרר/מאורר", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 2750.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "חשמל + ציוד", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 3200.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "מים +מים אפורים", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 3500.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "גז", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 350.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "תאורה", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 200.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "עצים", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 400.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "ציוד נוסף", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 800.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "קרח", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 80.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "אוכל להקמות", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 300.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "פינוי שירותים ומיים אפורים", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 1200.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "פריסה", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 1540.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "קפה", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 600.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "ניקיון", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 100.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "פירות", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 300.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "תבלינים", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 100.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "שמן וסויה", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 100.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "תה", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 70.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "ארוחות בוקר", "driver" : "per_meal", "param" : "breakfast_count", "base" : 1.00, "unit" : 300.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "ארוחות ערב", "driver" : "per_meal", "param" : "dinner_count", "base" : 1.00, "unit" : 400.0000, "when" : null, "overrides" : null}, {"dept" : "kitchen", "name" : "שונות", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 400.0000, "when" : null, "overrides" : null}, {"dept" : "art", "name" : "בדים", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 500.0000, "when" : null, "overrides" : null}, {"dept" : "art", "name" : "צבעים", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 400.0000, "when" : null, "overrides" : null}, {"dept" : "art", "name" : "עץ", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 600.0000, "when" : null, "overrides" : null}, {"dept" : "art", "name" : "חומרי יצירה", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 250.0000, "when" : null, "overrides" : null}, {"dept" : "art", "name" : "מתכלים", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 500.0000, "when" : null, "overrides" : null}, {"dept" : "gift", "name" : "קורנפלקסים", "driver" : "per_member", "param" : "member_count", "base" : 1.00, "unit" : 42.8571, "when" : null, "overrides" : [{"param" : "gift_level", "value" : "basic", "unit" : 25.71}, {"param" : "gift_level", "value" : "premium", "unit" : 68.57}]}, {"dept" : "gift", "name" : "חלב", "driver" : "per_member", "param" : "member_count", "base" : 1.00, "unit" : 22.8571, "when" : null, "overrides" : [{"param" : "gift_level", "value" : "basic", "unit" : 13.71}, {"param" : "gift_level", "value" : "premium", "unit" : 36.57}]}, {"dept" : "gift", "name" : "שונות", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 700.0000, "when" : null, "overrides" : null}, {"dept" : "showers", "name" : "משאבת מים אפורים", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 350.0000, "when" : null, "overrides" : null}, {"dept" : "showers", "name" : "שמפו מרכך סבון לקמפ", "driver" : "per_member", "param" : "member_count", "base" : 1.00, "unit" : 5.7143, "when" : null, "overrides" : null}, {"dept" : "showers", "name" : "שונות", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 200.0000, "when" : null, "overrides" : null}, {"dept" : "showers", "name" : "תוספות אייל", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 500.0000, "when" : null, "overrides" : null}, {"dept" : "installation", "name" : "רצפה וקונסטרוקציה", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 650.0000, "when" : null, "overrides" : null}, {"dept" : "installation", "name" : "חפצים (טמגוצ'י, קלטות, כוכבים זוהרים ודברים שאי אפשר להשיג)", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 350.0000, "when" : null, "overrides" : null}, {"dept" : "installation", "name" : "עובד של שמעון", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 200.0000, "when" : null, "overrides" : null}, {"dept" : "installation", "name" : "הובלה (בע\"ה לא נצטרך)", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 0.0000, "when" : null, "overrides" : null}, {"dept" : "installation", "name" : "שטיח", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 100.0000, "when" : null, "overrides" : null}, {"dept" : "installation", "name" : "שונות", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 700.0000, "when" : null, "overrides" : null}, {"dept" : "misc", "name" : "סלון", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 400.0000, "when" : null, "overrides" : null}, {"dept" : "misc", "name" : "אכהל", "driver" : "fixed", "param" : null, "base" : 1.00, "unit" : 1800.0000, "when" : null, "overrides" : null}, {"dept" : "logistics", "name" : "רשת צל + הקמה 460 מ\"ר", "driver" : "per_sqm", "param" : "shade_area_sqm", "base" : 1.00, "unit" : 15.6522, "when" : {"shade_type": "net"}, "overrides" : null}], "params" : [{"key" : "member_count", "label" : "מספר חברי קמפ", "type" : "number", "default" : 36, "options" : null}, {"key" : "shade_type", "label" : "סוג הצללה", "type" : "enum", "default" : "net", "options" : [{"value" : "net", "label" : "רשת צל + הקמה"}, {"value" : "sail", "label" : "מפרשי צל"}, {"value" : "none", "label" : "ללא הצללה מרכזית"}]}, {"key" : "shade_area_sqm", "label" : "שטח הצללה (מ\"ר)", "type" : "number", "default" : 460, "options" : null}, {"key" : "dinner_count", "label" : "מספר ארוחות ערב משותפות", "type" : "number", "default" : 5, "options" : null}, {"key" : "breakfast_count", "label" : "מספר ארוחות בוקר משותפות", "type" : "number", "default" : 5, "options" : null}, {"key" : "gift_level", "label" : "רמת השקעה בגיפט", "type" : "enum", "default" : "standard", "options" : [{"value" : "basic", "label" : "בסיסי"}, {"value" : "standard", "label" : "רגיל (כמו 2025)"}, {"value" : "premium", "label" : "מושקע"}]}, {"key" : "buffer_pct", "label" : "רזרבה (%) על כלל התקציב", "type" : "number", "default" : 5, "options" : null}], "actuals" : [{"dept" : "logistics", "name" : "הובלה", "amount" : 5150.00, "paid_by" : "עומרי"}, {"dept" : "logistics", "name" : "רשת צל תוספת", "amount" : 826.00, "paid_by" : null}, {"dept" : "logistics", "name" : "רשת צל + הקמה 460 מ\"ר + 50 מטר נוספים", "amount" : 10266.00, "paid_by" : "5133 מקדמה עומרי,5959 ירדן"}, {"dept" : "logistics", "name" : "השכרת מקרר (מקרר עומד גדול + מקפיא שוכב)", "amount" : 1186.00, "paid_by" : "עומרי"}, {"dept" : "logistics", "name" : "חשמל (3000 ואט + 1500 ואט אופציה)", "amount" : 1565.00, "paid_by" : "עומרי"}, {"dept" : "logistics", "name" : "מים", "amount" : 2714.00, "paid_by" : "עומרי"}, {"dept" : "logistics", "name" : "פינויים מים אפורים", "amount" : 1416.00, "paid_by" : "עומרי"}, {"dept" : "logistics", "name" : "גז", "amount" : 200.00, "paid_by" : null}, {"dept" : "logistics", "name" : "תאורה (קניית נורות)", "amount" : 0.00, "paid_by" : null}, {"dept" : "logistics", "name" : "עצים", "amount" : 658.00, "paid_by" : null}, {"dept" : "logistics", "name" : "חשלש", "amount" : 575.00, "paid_by" : null}, {"dept" : "logistics", "name" : "קרח", "amount" : 500.00, "paid_by" : null}, {"dept" : "logistics", "name" : "אוכל להקמות", "amount" : 1600.00, "paid_by" : null}, {"dept" : "logistics", "name" : "פינוי שירותים  (12 דליים)", "amount" : 1500.00, "paid_by" : "עומרי"}, {"dept" : "logistics", "name" : "דלק גנרטור", "amount" : 299.00, "paid_by" : "עומרי"}, {"dept" : "logistics", "name" : "השתתפות בדלק נגרר", "amount" : 250.00, "paid_by" : null}, {"dept" : "logistics", "name" : "בד נמתח", "amount" : 255.00, "paid_by" : "ניב"}, {"dept" : "kitchen", "name" : "שופרסל", "amount" : 3370.00, "paid_by" : null}, {"dept" : "kitchen", "name" : "ארוחות ערב", "amount" : 2000.00, "paid_by" : null}, {"dept" : "kitchen", "name" : "שונות", "amount" : 275.00, "paid_by" : null}, {"dept" : "kitchen", "name" : "משלוח למדבר", "amount" : 120.00, "paid_by" : null}, {"dept" : "art", "name" : "בדים", "amount" : 500.00, "paid_by" : null}, {"dept" : "art", "name" : "צבעים", "amount" : 400.00, "paid_by" : null}, {"dept" : "art", "name" : "עץ", "amount" : 600.00, "paid_by" : null}, {"dept" : "art", "name" : "חומרי יצירה", "amount" : 250.00, "paid_by" : null}, {"dept" : "art", "name" : "מתכלים", "amount" : 500.00, "paid_by" : null}, {"dept" : "art", "name" : "תוספת עץ", "amount" : 750.00, "paid_by" : null}, {"dept" : "gift", "name" : "קורנפלקסים", "amount" : 1700.00, "paid_by" : null}, {"dept" : "gift", "name" : "חלב", "amount" : 800.00, "paid_by" : null}, {"dept" : "gift", "name" : "שונות", "amount" : 700.00, "paid_by" : null}, {"dept" : "showers", "name" : "נייר שירותים", "amount" : 100.00, "paid_by" : null}, {"dept" : "showers", "name" : "מוצרי ניקיון", "amount" : 30.00, "paid_by" : null}, {"dept" : "showers", "name" : "ארט", "amount" : 221.00, "paid_by" : null}, {"dept" : "showers", "name" : "אסלה", "amount" : 42.00, "paid_by" : null}, {"dept" : "showers", "name" : "תאורה לשירותים", "amount" : 20.00, "paid_by" : null}, {"dept" : "showers", "name" : "לדים למקלחת", "amount" : 250.00, "paid_by" : null}, {"dept" : "showers", "name" : "בטטות השרשה למקלחת", "amount" : 130.00, "paid_by" : null}, {"dept" : "showers", "name" : "שמפו וסבון", "amount" : 170.00, "paid_by" : null}, {"dept" : "showers", "name" : "טושים למקלחת", "amount" : 7.00, "paid_by" : null}, {"dept" : "showers", "name" : "וילון ומגנטים למקלחת", "amount" : 40.00, "paid_by" : null}, {"dept" : "showers", "name" : "מתלה שמפואים", "amount" : 35.00, "paid_by" : null}, {"dept" : "installation", "name" : "גזיבו", "amount" : 500.00, "paid_by" : "גיא"}, {"dept" : "installation", "name" : "פלטות OSB", "amount" : 1030.00, "paid_by" : "גיא"}, {"dept" : "installation", "name" : "שולחן", "amount" : 80.00, "paid_by" : "ניב"}, {"dept" : "installation", "name" : "צבע סגול", "amount" : 400.00, "paid_by" : "גיא"}, {"dept" : "installation", "name" : "חומר מעכב בעירה", "amount" : 170.00, "paid_by" : null}, {"dept" : "installation", "name" : "שוק פשפשים", "amount" : 150.00, "paid_by" : null}, {"dept" : "installation", "name" : "מחשבים + וידאו", "amount" : 300.00, "paid_by" : null}, {"dept" : "installation", "name" : "Temu", "amount" : 150.00, "paid_by" : null}, {"dept" : "misc", "name" : "סלון מקס סטוק", "amount" : 177.00, "paid_by" : null}, {"dept" : "misc", "name" : "סלון כיסוי ספה", "amount" : 100.00, "paid_by" : null}, {"dept" : "misc", "name" : "סלון מתלה בגדים", "amount" : 50.00, "paid_by" : null}, {"dept" : "misc", "name" : "אכהל", "amount" : 1800.00, "paid_by" : null}, {"dept" : "misc", "name" : "שלט לכיכר", "amount" : 150.00, "paid_by" : null}, {"dept" : "misc", "name" : "פיצות דיקומפרשן", "amount" : 1027.00, "paid_by" : null}], "ledger" : [{"name" : "אורי אדיב", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 1938.00, "surplus" : 13.77, "balance" : -1951.77}, {"name" : "טל אדיבי", "tier" : "friend", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 0, "surplus" : 13.77, "balance" : -13.77}, {"name" : "הודיה אוגלי", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 0, "surplus" : 13.77, "balance" : -13.77}, {"name" : "ניב בורנשטיין", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 1015.00, "surplus" : 13.77, "balance" : -1028.77}, {"name" : "עינת בן שושן", "tier" : "core", "share" : 0.8148, "due" : 1324.05, "paid" : 1100.00, "fronted" : 0, "surplus" : 11.22, "balance" : 212.83}, {"name" : "איתמר ברזילי", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 90.00, "surplus" : 13.77, "balance" : -103.77}, {"name" : "רוני גוסקוב", "tier" : "partner", "share" : 1.0000, "due" : 1625.00, "paid" : 1900.00, "fronted" : 0, "surplus" : 13.77, "balance" : -288.77}, {"name" : "רוני גילה", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1350.00, "fronted" : 404.00, "surplus" : 13.77, "balance" : -142.77}, {"name" : "עמית גלילי", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 36.00, "surplus" : 13.77, "balance" : -49.77}, {"name" : "גבע גנון", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 2790.00, "surplus" : 13.77, "balance" : -2803.77}, {"name" : "ירדן גנון", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 7811.00, "surplus" : 13.77, "balance" : -7824.77}, {"name" : "אדר גרנק", "tier" : "semi_core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 75.00, "surplus" : 13.77, "balance" : -88.77}, {"name" : "נדב דהן", "tier" : "friend", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 168.00, "surplus" : 13.77, "balance" : -181.77}, {"name" : "אדוה דויטש", "tier" : "friend", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 37.00, "surplus" : 13.77, "balance" : -50.77}, {"name" : "גל הגואל", "tier" : "friend", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 0, "surplus" : 13.77, "balance" : -13.77}, {"name" : "קרן הורנשטיין", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 0, "surplus" : 13.77, "balance" : -13.77}, {"name" : "שחף זייד", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 0, "surplus" : 13.77, "balance" : -13.77}, {"name" : "עומר זילברמן", "tier" : "partner", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 188.00, "surplus" : 13.77, "balance" : -201.77}, {"name" : "עידן חביב", "tier" : "friend", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 330.00, "surplus" : 13.77, "balance" : -343.77}, {"name" : "טלי חוצ׳ינסקי", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 0, "surplus" : 13.77, "balance" : -13.77}, {"name" : "דר חמצני", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 520.00, "surplus" : 13.77, "balance" : -533.77}, {"name" : "שי ידיד", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 80.00, "surplus" : 13.77, "balance" : -93.77}, {"name" : "שיר יצחקי", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1250.00, "fronted" : 105.00, "surplus" : 13.77, "balance" : 256.23}, {"name" : "רעות לוי", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 3645.00, "surplus" : 13.77, "balance" : -3658.77}, {"name" : "לירן לוין", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1525.00, "fronted" : 260.00, "surplus" : 13.77, "balance" : -173.77}, {"name" : "נעם מימון", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 2805.00, "surplus" : 13.77, "balance" : -2818.77}, {"name" : "עומרי סוברי", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1250.00, "fronted" : 31646.00, "surplus" : 13.77, "balance" : -31284.77}, {"name" : "רועי סיטבון", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 0, "surplus" : 13.77, "balance" : -13.77}, {"name" : "דפי פרוימוביץ אדיבי", "tier" : "friend", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 310.00, "surplus" : 13.77, "balance" : -323.77}, {"name" : "אייל פריימן", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1525.00, "fronted" : 1627.00, "surplus" : 13.77, "balance" : -1540.77}, {"name" : "גיא רמות", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 2000.00, "surplus" : 13.77, "balance" : -2013.77}, {"name" : "גילי רפפורט", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 413.00, "surplus" : 13.77, "balance" : -426.77}, {"name" : "ניצן רצון", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 0, "surplus" : 13.77, "balance" : -13.77}, {"name" : "עדי שבתאי", "tier" : "friend", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 340.00, "surplus" : 13.77, "balance" : -353.77}, {"name" : "ליאת שבתאי", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1525.00, "fronted" : 420.00, "surplus" : 13.77, "balance" : -333.77}, {"name" : "יואב שהם", "tier" : "friend", "share" : 1.0000, "due" : 1625.00, "paid" : 1525.00, "fronted" : 75.00, "surplus" : 13.77, "balance" : 11.23}, {"name" : "כפיר שלו", "tier" : "core", "share" : 1.0000, "due" : 1625.00, "paid" : 1625.00, "fronted" : 190.00, "surplus" : 13.77, "balance" : -203.77}], "expenses" : [{"who" : "ליאת", "desc" : "ארוחת ערב וכיסוי ספה", "amount" : 420.00}, {"who" : "אייל", "desc" : "מקלחת+ פיצות דיקומפרשן", "amount" : 1627.00}, {"who" : "גילי", "desc" : "בניית שירותים, נייר טואלט, אסלה", "amount" : 413.00}, {"who" : "כפיר", "desc" : "קרח, מחשב", "amount" : 190.00}, {"who" : "עדי", "desc" : "חלב, מקס סטוק לסלון, ארוחת ערב יום ב", "amount" : 340.00}, {"who" : "רעות", "desc" : "מטבח", "amount" : 3645.00}, {"who" : "עמית", "desc" : "חלב", "amount" : 36.00}, {"who" : "דפי", "desc" : "מתלה בגדים,חלב, ארוחת ערב", "amount" : 310.00}, {"who" : "עידן", "desc" : "ארוחת שישי", "amount" : 330.00}, {"who" : "ניב", "desc" : "שולחן לחדר ילדים + בד נמתח + שלט לכיכר +קרח+זבל+טיפ נהג+ ירקות לדיקומפרשן (40)", "amount" : 1015.00}, {"who" : "גיא", "desc" : "חדר ילדים", "amount" : 2000.00}, {"who" : "נעם", "desc" : "גיפט", "amount" : 2805.00}, {"who" : "איתמר", "desc" : "6 שקיות קרח", "amount" : 90.00}, {"who" : "ירדן", "desc" : "אוכל הקמות, השלמה לרשת צל, סבון למקלחת, ארוחת ערב רביעי", "amount" : 7811.00}, {"who" : "יואב", "desc" : "חלב", "amount" : 75.00}, {"who" : "עומר", "desc" : "ארוחת ערב, חלב", "amount" : 188.00}, {"who" : "דר", "desc" : "הוצאה מגיליון תשלומים 2025", "amount" : 520.00}, {"who" : "גבע", "desc" : "קרח וארט", "amount" : 2790.00}, {"who" : "עומרי", "desc" : "נסורת, שירותים, מקדמת צל", "amount" : 6758.00}, {"who" : "עומרי", "desc" : "הוצאה מגיליון תשלומים 2025", "amount" : 24888.00}, {"who" : "נדב", "desc" : "דליים וגיגיות", "amount" : 168.00}, {"who" : "שיר", "desc" : "סיפון לכיור, נייר לשירותים, סוללות לדים לקמפ", "amount" : 105.00}, {"who" : "אדוה", "desc" : "חלב", "amount" : 37.00}, {"who" : "אדר", "desc" : "חשלש", "amount" : 75.00}, {"who" : "אורי", "desc" : "הוצאה מגיליון תשלומים 2025", "amount" : 1938.00}, {"who" : "שי", "desc" : "גליל נייר סופג", "amount" : 80.00}, {"who" : "לירן", "desc" : "למוביל", "amount" : 260.00}, {"who" : "רוני", "desc" : "ארוחת ערב יום חמישי", "amount" : 404.00}], "vendors" : ["גל מרין", "דור אלון", "מוחמד הסעות", "מזור הובלות", "מידברן", "נגב אקולוגיה", "סה״כ להחזיר", "קאמפ2גו", "שירותטבע", "שנטיפי"]}</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const fmt = n => Math.round(n).toLocaleString('he-IL') + ' ₪';
+const fmt0 = n => Math.round(n).toLocaleString('he-IL');
+const $ = s => document.querySelector(s);
+const DEPT = Object.fromEntries(DATA.departments.map(d => [d.slug, d.name]));
+
+// demo-only extra catalog item so "sail" has a price (marked as an assumption)
+DATA.cost_items.push({dept:'logistics', name:'מפרשי צל (השכרה + הקמה) — הנחת דמו', driver:'per_sqm', param:'shade_area_sqm', base:1, unit:22, when:{shade_type:'sail'}, overrides:null});
+
+const RANGES = {member_count:[20,80,1], shade_area_sqm:[200,800,10], dinner_count:[0,7,1], breakfast_count:[0,7,1], buffer_pct:[0,15,1]};
+const BASELINE = {member_count:35, shade_type:'net', shade_area_sqm:460, dinner_count:5, breakfast_count:5, gift_level:'standard', buffer_pct:0};
+const PRESET   = {member_count:50, shade_type:'sail', shade_area_sqm:560, dinner_count:5, breakfast_count:5, gift_level:'premium', buffer_pct:5};
+let params = {...BASELINE};
+
+// ---------- state that the demo mutates ----------
+const state = { extraActuals: [], ledgerAdj: {}, requests: [
+  {dept:'kitchen', title:'השלמת מצרכים לארוחת שישי', amount:450, status:'pending', by:'רעות'},
+  {dept:'kitchen', title:'מכונת קפה שנייה', amount:600, status:'rejected', by:'שיר'},
+  {dept:'logistics', title:'50 מ"ר רשת צל נוספים', amount:826, status:'purchased', by:'ירדן'},
+  {dept:'logistics', title:'6 שקי עצים נוספים', amount:260, status:'pending', by:'עומרי'},
+  {dept:'art', title:'תוספת עץ למיצב הכניסה', amount:750, status:'approved', by:'גבע'},
+  {dept:'gift', title:'קערות מתכלות לגיפט', amount:300, status:'pending', by:'נעם'},
+  {dept:'showers', title:'לדים למקלחת', amount:250, status:'purchased', by:'אייל'},
+  {dept:'installation', title:'פלטות OSB לחדר ילדים', amount:1030, status:'purchased', by:'גיא'},
+  {dept:'misc', title:'פיצות לדיקומפרשן', amount:1027, status:'approved', by:'אייל'},
+]};
+const REQ_LABEL = {pending:['ממתין לאישור','warn'], approved:['אושר','plan'], rejected:['נדחה','bad'], purchased:['נרכש','good']};
+
+// ---------- scenario engine (mirror of compute_scenario in SQL) ----------
+function compute(p){
+  const lines = [];
+  for (const ci of DATA.cost_items){
+    if (ci.when && Object.entries(ci.when).some(([k,v]) => String(p[k]) !== String(v))) continue;
+    let qty = Number(ci.base), unit = Number(ci.unit);
+    if (ci.driver !== 'fixed' && ci.param) qty = Number(ci.base) * Number(p[ci.param]);
+    for (const o of (ci.overrides || [])) if (String(p[o.param]) === String(o.value) && o.unit != null) unit = Number(o.unit);
+    lines.push({dept:ci.dept, name:ci.name, qty, unit, amount: qty*unit, driver:ci.driver});
+  }
+  const total = lines.reduce((s,l)=>s+l.amount,0);
+  const byDept = {}; for (const l of lines) byDept[l.dept] = (byDept[l.dept]||0) + l.amount;
+  const dues = total * (1 + Number(p.buffer_pct)/100) / Number(p.member_count);
+  return {lines, total, byDept, dues};
+}
+const baseline = compute(BASELINE);
+
+// ---------- scenario UI ----------
+function renderParams(){
+  const box = $('#params'); box.innerHTML = '<h3>לוח הגדרות</h3>';
+  for (const pr of DATA.params){
+    const f = document.createElement('div'); f.className = 'field';
+    if (pr.type === 'number'){
+      const [min,max,step] = RANGES[pr.key];
+      f.innerHTML = `<div class="rangehead"><label for="p-${pr.key}">${pr.label}</label><b id="v-${pr.key}">${params[pr.key]}</b></div>
+        <input type="range" id="p-${pr.key}" min="${min}" max="${max}" step="${step}" value="${params[pr.key]}">`;
+      f.querySelector('input').addEventListener('input', e => { params[pr.key] = Number(e.target.value); $('#v-'+pr.key).textContent = e.target.value; renderScenario(); });
+    } else {
+      f.innerHTML = `<label for="p-${pr.key}">${pr.label}</label><select id="p-${pr.key}">${pr.options.map(o=>`<option value="${o.value}" ${o.value===params[pr.key]?'selected':''}>${o.label}</option>`).join('')}</select>`;
+      f.querySelector('select').addEventListener('change', e => { params[pr.key] = e.target.value; renderScenario(); });
+    }
+    box.appendChild(f);
+  }
+  const n = document.createElement('p'); n.className='note'; n.textContent = 'כל כפתור כאן הוא שורה בטבלת הפרמטרים. להוסיף כפתור חדש = להוסיף שורה, בלי לגעת בקוד.'; box.appendChild(n);
+}
+let openDept = null;
+function renderScenario(){
+  const r = compute(params);
+  $('#k-dues').textContent = fmt(r.dues);
+  $('#k-dues-sub').textContent = `${params.member_count} חברים · רזרבה ${params.buffer_pct}%`;
+  $('#k-total').textContent = fmt(r.total);
+  $('#k-total-sub').textContent = `${r.lines.length} סעיפים פעילים`;
+  const d = r.total - baseline.total;
+  $('#k-diff').textContent = (d>=0?'+':'−') + fmt(Math.abs(d));
+  $('#k-diff').style.color = d>0 ? 'var(--bad)' : d<0 ? 'var(--good)' : 'inherit';
+  let html = `<thead><tr><th>מחלקה</th><th class="num">תרחיש נוכחי</th><th class="num">הערכת 2025</th><th class="num">הפרש</th></tr></thead><tbody>`;
+  for (const dep of DATA.departments){
+    const cur = r.byDept[dep.slug]||0, base = baseline.byDept[dep.slug]||0, diff = cur-base;
+    html += `<tr class="dept-row" data-dept="${dep.slug}"><td>${openDept===dep.slug?'▾':'▸'} ${dep.name}</td><td class="num">${fmt0(cur)}</td><td class="num">${fmt0(base)}</td><td class="num" style="color:${diff>0?'var(--bad)':diff<0?'var(--good)':'var(--muted)'}">${diff===0?'—':(diff>0?'+':'−')+fmt0(Math.abs(diff))}</td></tr>`;
+    if (openDept===dep.slug) for (const l of r.lines.filter(l=>l.dept===dep.slug))
+      html += `<tr class="sub"><td>${l.name}${l.driver!=='fixed'?` <span class="pill plan">${l.driver==='per_member'?'לפי חבר':l.driver==='per_sqm'?'לפי מ"ר':'לפי ארוחה'}</span>`:''}</td><td class="num">${fmt0(l.amount)}</td><td class="num">${fmt0((baseline.lines.find(b=>b.name===l.name)||{amount:0}).amount)}</td><td class="num">${l.driver!=='fixed'?`${fmt0(l.qty)} × ${l.unit.toFixed(2)}`:''}</td></tr>`;
+  }
+  html += `</tbody><tfoot><tr class="total"><td>סה"כ</td><td class="num">${fmt0(r.total)}</td><td class="num">${fmt0(baseline.total)}</td><td class="num">${d===0?'—':(d>0?'+':'−')+fmt0(Math.abs(d))}</td></tr></tfoot>`;
+  $('#scen-table').innerHTML = html;
+  document.querySelectorAll('#scen-table tr.dept-row').forEach(tr => tr.addEventListener('click', ()=>{ openDept = openDept===tr.dataset.dept?null:tr.dataset.dept; renderScenario(); }));
+}
+function setParams(p){ params = {...p}; renderParams(); renderScenario(); }
+$('#btn-reset').addEventListener('click', ()=>setParams(BASELINE));
+$('#btn-preset').addEventListener('click', ()=>setParams(PRESET));
+
+// ---------- department module ----------
+function actualsFor(slug){ return DATA.actuals.filter(a=>a.dept===slug).concat(state.extraActuals.filter(a=>a.dept===slug)); }
+function renderDept(){
+  const slug = $('#dept-select').value;
+  const planned = baseline.lines.filter(l=>l.dept===slug);
+  const actuals = actualsFor(slug);
+  const pT = planned.reduce((s,l)=>s+l.amount,0), aT = actuals.reduce((s,a)=>s+Number(a.amount),0);
+  const pend = state.requests.filter(r=>r.dept===slug && r.status==='pending');
+  $('#dept-kpis').innerHTML = [
+    ['תקציב מאושר', fmt(pT), 'מההערכה הראשונית'],
+    ['הוצא בפועל', fmt(aT), `${actuals.length} הוצאות`],
+    ['נשאר', fmt(pT-aT), pT-aT<0?'חריגה':'בתקציב'],
+    ['בקשות ממתינות', pend.length, pend.length?fmt(pend.reduce((s,r)=>s+r.amount,0)):'']
+  ].map(([l,v,s],i)=>`<div class="kpi ${i===2?(pT-aT<0?'':'accent'):''}"><span class="label">${l}</span><span class="value" style="${i===2&&pT-aT<0?'color:var(--bad)':''}">${v}</span><span class="sub">${s}</span></div>`).join('');
+
+  // merge planned + actual rows by name (loose match on first word)
+  const rows = planned.map(l=>({name:l.name, planned:l.amount, actual:0, who:[]}));
+  for (const a of actuals){
+    const key = a.name.split(/[\s(+]/)[0];
+    let row = rows.find(r=>r.name.startsWith(key) || a.name.startsWith(r.name.split(/[\s(+]/)[0]));
+    if (!row){ row = {name:a.name, planned:null, actual:0, who:[]}; rows.push(row); }
+    row.actual += Number(a.amount); if (a.paid_by) row.who.push(a.paid_by);
+  }
+  let html = `<thead><tr><th>סעיף</th><th class="num">מתוכנן</th><th class="num">בפועל</th><th>מצב</th><th>שולם ע"י</th></tr></thead><tbody>`;
+  for (const r of rows){
+    const st = r.planned==null ? ['לא מתוכנן','warn'] : r.actual===0 ? ['טרם הוצא','muted'] : r.actual>r.planned ? ['חריגה','bad'] : ['בתקציב','good'];
+    html += `<tr><td>${r.name}</td><td class="num">${r.planned==null?'—':fmt0(r.planned)}</td><td class="num">${r.actual?fmt0(r.actual):'—'}</td><td><span class="pill ${st[1]}">${st[0]}</span></td><td style="color:var(--muted);font-size:13px">${[...new Set(r.who)].join(', ')}</td></tr>`;
+  }
+  html += `</tbody><tfoot><tr class="total"><td>סה"כ</td><td class="num">${fmt0(pT)}</td><td class="num">${fmt0(aT)}</td><td colspan="2"><div class="bar" style="margin-top:6px"><i class="${aT>pT?'over':''}" style="width:${Math.min(100,aT/Math.max(pT,aT)*100)}%"></i>${aT>pT?`<b style="right:${pT/aT*100}%"></b>`:''}</div></td></tr></tfoot>`;
+  $('#dept-table').innerHTML = html;
+
+  const reqs = state.requests.filter(r=>r.dept===slug);
+  $('#req-table').innerHTML = `<thead><tr><th>בקשה</th><th class="num">הערכה</th><th>מבקש</th><th>מצב</th></tr></thead><tbody>` +
+    (reqs.length ? reqs.map(r=>`<tr><td>${r.title}</td><td class="num">${fmt0(r.amount)}</td><td>${r.by}</td><td><span class="pill ${REQ_LABEL[r.status][1]}">${REQ_LABEL[r.status][0]}</span></td></tr>`).join('') : '<tr><td colspan="4" style="color:var(--muted)">אין בקשות למחלקה הזו</td></tr>') + '</tbody>';
+
+  $('#x-line').innerHTML = planned.map(l=>`<option>${l.name}</option>`).join('') + '<option value="__new">סעיף שלא תוכנן</option>';
+}
+$('#dept-select').innerHTML = DATA.departments.map(d=>`<option value="${d.slug}">${d.name}</option>`).join('');
+$('#dept-select').value = 'kitchen';
+$('#dept-select').addEventListener('change', renderDept);
+$('#x-who').innerHTML = DATA.ledger.map(m=>`<option>${m.name}</option>`).join('');
+$('#x-add').addEventListener('click', ()=>{
+  const desc = $('#x-desc').value.trim(), amt = Number($('#x-amount').value), who = $('#x-who').value, line = $('#x-line').value;
+  if (!desc || !amt){ toast('צריך תיאור וסכום'); return; }
+  const slug = $('#dept-select').value;
+  state.extraActuals.push({dept:slug, name: line==='__new' ? desc : line + ' (' + desc + ')', amount:amt, paid_by: who.split(' ')[0]});
+  state.ledgerAdj[who] = (state.ledgerAdj[who]||0) + amt;
+  $('#x-desc').value=''; $('#x-amount').value='';
+  renderDept(); renderLedger(); renderMgmt();
+  toast(`נרשם: ${desc} · ${fmt(amt)} · ${who}`);
+});
+
+// ---------- ledger ----------
+let ledgerFilter = 'all', selected = null;
+function ledgerRows(){
+  const rows = DATA.ledger.map(m=>({...m, fronted: Number(m.fronted) + (state.ledgerAdj[m.name]||0)}));
+  const POOL_EXTRA = 1375; // storage fees (275 x 5) paid by members on the list who did not attend - still part of the pool
+  const collected = rows.reduce((s,m)=>s+Number(m.paid),0) + POOL_EXTRA;
+  const spent = rows.reduce((s,m)=>s+m.fronted,0);
+  const surplus = collected - spent, shares = rows.reduce((s,m)=>s+Number(m.share),0);
+  for (const m of rows){ m.surplus = surplus*Number(m.share)/shares; m.balance = Number(m.due) - Number(m.paid) - m.fronted - m.surplus; }
+  return {rows, collected, spent, surplus};
+}
+function renderLedger(){
+  const L = ledgerRows();
+  const refunds = L.rows.filter(m=>m.balance<0), owes = L.rows.filter(m=>m.balance>0.5);
+  $('#ledger-kpis').innerHTML = [
+    ['נגבה לקופה', fmt(L.collected), `${L.rows.length} חברים + 5 שמשלמים רק מחסן`],
+    ['הוצא (כולל מהכיס)', fmt(L.spent), ''],
+    ['עודף לחלוקה', fmt(L.surplus), `≈ ${fmt(L.surplus/L.rows.length)} לחבר`],
+    ['החזרים שהקמפ חייב', fmt(-refunds.reduce((s,m)=>s+m.balance,0)), `ל‑${refunds.length} חברים · ${owes.length} חייבים`]
+  ].map(([l,v,s],i)=>`<div class="kpi ${i===3?'accent':''}"><span class="label">${l}</span><span class="value">${v}</span><span class="sub">${s}</span></div>`).join('');
+  let rows = L.rows.slice().sort((a,b)=>a.balance-b.balance);
+  if (ledgerFilter==='refund') rows = rows.filter(m=>m.balance<0);
+  if (ledgerFilter==='owes') rows = rows.filter(m=>m.balance>0.5);
+  if (ledgerFilter==='fronted') rows = rows.filter(m=>m.fronted>0);
+  const TIER = {core:'גרעין', semi_core:'סוג של גרעין', friend:'חבר של', partner:'בן זוג'};
+  let html = `<thead><tr><th>חבר</th><th>מעמד</th><th class="num">חוב</th><th class="num">שילם</th><th class="num">הוציא מהכיס</th><th class="num">חלק בעודף</th><th class="num">יתרה</th><th></th></tr></thead><tbody>`;
+  for (const m of rows){
+    const pill = m.balance < -0.5 ? `<span class="pill good">להחזיר ${fmt0(-m.balance)}</span>` : m.balance > 0.5 ? `<span class="pill bad">חייב ${fmt0(m.balance)}</span>` : `<span class="pill muted">מאוזן</span>`;
+    html += `<tr class="dept-row" data-name="${m.name}"><td>${m.name}</td><td style="color:var(--muted);font-size:13px">${TIER[m.tier]}${Number(m.share)<1?` · ${Math.round(m.share*100)}%`:''}</td><td class="num">${fmt0(m.due)}</td><td class="num">${fmt0(m.paid)}</td><td class="num">${m.fronted?fmt0(m.fronted):'—'}</td><td class="num">${fmt0(m.surplus)}</td><td class="num">${fmt0(m.balance)}</td><td>${pill}</td></tr>`;
+  }
+  $('#ledger-table').innerHTML = html + '</tbody>';
+  document.querySelectorAll('#ledger-table tr.dept-row').forEach(tr=>tr.addEventListener('click', ()=>{ selected = selected===tr.dataset.name?null:tr.dataset.name; renderDetail(L); }));
+  renderDetail(L);
+}
+function renderDetail(L){
+  const box = $('#ledger-detail'); const m = L.rows.find(r=>r.name===selected);
+  if (!m){ box.hidden = true; return; }
+  box.hidden = false;
+  const exps = DATA.expenses.filter(e=>e.who===m.name.split(' ')[0]).map(e=>`${e.desc} — ${fmt0(e.amount)}`);
+  const adj = state.ledgerAdj[m.name] ? [`הוצאה שנרשמה עכשיו בדמו — ${fmt0(state.ledgerAdj[m.name])}`] : [];
+  box.innerHTML = `<h3>${m.name}</h3><dl>
+    <dt>חוב (דמי קמפ + מחסן)</dt><dd>${fmt0(m.due)}</dd>
+    <dt>העביר לקופה</dt><dd>${fmt0(m.paid)}</dd>
+    <dt>הוציא מהכיס</dt><dd>${fmt0(m.fronted)}${exps.length||adj.length?'<br><span style="color:var(--muted);direction:rtl;display:inline-block">'+exps.concat(adj).join('<br>')+'</span>':''}</dd>
+    <dt>חלק בעודף</dt><dd>${fmt0(m.surplus)}</dd>
+    <dt><b>יתרה</b></dt><dd><b>${m.balance<0?`הקמפ מחזיר ${fmt0(-m.balance)}`:`חייב לקמפ ${fmt0(m.balance)}`}</b></dd></dl>
+    <p class="note">במערכת האמיתית: כפתור "סמן החזר כבוצע" יוצר רשומת payout ומאפס את היתרה, ותזכורת וואטסאפ יוצאת אוטומטית למי שחייב.</p>`;
+}
+$('#ledger-filters').addEventListener('click', e=>{ const b = e.target.closest('button'); if(!b) return; ledgerFilter=b.dataset.f; document.querySelectorAll('#ledger-filters button').forEach(x=>x.setAttribute('aria-pressed', x===b)); renderLedger(); });
+
+// ---------- management ----------
+function renderMgmt(){
+  const L = ledgerRows();
+  const deptActual = {}; for (const a of DATA.actuals.concat(state.extraActuals)) deptActual[a.dept] = (deptActual[a.dept]||0) + Number(a.amount);
+  const actualTotal = Object.values(deptActual).reduce((s,v)=>s+v,0);
+  const over = DATA.departments.filter(d=>(deptActual[d.slug]||0) > (baseline.byDept[d.slug]||0));
+  const notPaid = L.rows.filter(m=>Number(m.paid) < Number(m.due));
+  const pend = state.requests.filter(r=>r.status==='pending');
+  const refunds = L.rows.filter(m=>m.balance<0);
+  $('#mgmt-kpis').innerHTML = [
+    ['תקציב מאושר', fmt(baseline.total), '7 מחלקות'],
+    ['הוצא בפועל (מחלקות)', fmt(actualTotal), `${actualTotal>baseline.total?'+':''}${fmt0(actualTotal-baseline.total)} מול התכנון`],
+    ['נגבה מחברים', fmt(L.collected), `${L.rows.length} משלמים · ${notPaid.length} לא השלימו`],
+    ['בקופה אחרי הכל', fmt(L.surplus), 'לפני החזרים']
+  ].map(([l,v,s],i)=>`<div class="kpi ${i===1&&actualTotal>baseline.total?'':''}"><span class="label">${l}</span><span class="value" style="${i===1&&actualTotal>baseline.total?'color:var(--bad)':''}">${v}</span><span class="sub">${s}</span></div>`).join('');
+
+  // chart
+  const W=560,H=300,padL=50,padR=10,padT=14,padB=60, n=DATA.departments.length;
+  const maxV = Math.max(...DATA.departments.map(d=>Math.max(baseline.byDept[d.slug]||0, deptActual[d.slug]||0)));
+  const step = maxV>20000?10000:5000, top = Math.ceil(maxV/step)*step;
+  const y = v => padT + (H-padT-padB) * (1 - v/top);
+  const gw = (W-padL-padR)/n, bw = gw*0.32;
+  let svg = '';
+  for (let v=0; v<=top; v+=step) svg += `<line x1="${padL}" x2="${W-padR}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${padL-6}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="var(--muted)">${v/1000}K</text>`;
+  DATA.departments.forEach((d,i)=>{
+    const x0 = padL + gw*i + gw*0.15, p = baseline.byDept[d.slug]||0, a = deptActual[d.slug]||0;
+    svg += `<rect x="${x0}" y="${y(p)}" width="${bw}" height="${y(0)-y(p)}" fill="var(--plan)" rx="2"/>`;
+    svg += `<rect x="${x0+bw+3}" y="${y(a)}" width="${bw}" height="${y(0)-y(a)}" fill="${a>p?'var(--bad)':'var(--accent)'}" rx="2"/>`;
+    const label = d.name.split(' ')[0].replace('/','');
+    svg += `<text x="${x0+bw+1.5}" y="${H-padB+16}" font-size="11" text-anchor="middle" fill="var(--ink)">${label}</text>`;
+    svg += `<text x="${x0+bw+1.5}" y="${H-padB+32}" font-size="10" text-anchor="middle" fill="var(--muted)">${fmt0(a)}</text>`;
+  });
+  $('#mgmt-chart').innerHTML = svg;
+
+  // alerts
+  let al = '';
+  for (const d of over) al += `<div class="alert bad"><span class="dot"></span><div>${d.name}: חריגה של ${fmt(deptActual[d.slug]-(baseline.byDept[d.slug]||0))}<small>מתוכנן ${fmt0(baseline.byDept[d.slug]||0)} · בפועל ${fmt0(deptActual[d.slug])}</small></div></div>`;
+  if (notPaid.length) al += `<div class="alert warn"><span class="dot"></span><div>${notPaid.length} חברים לא השלימו את דמי הקמפ<small>${notPaid.slice(0,6).map(m=>`${m.name} (חסר ${fmt0(m.due-m.paid)})`).join(' · ')}${notPaid.length>6?' ועוד…':''}</small><small>במערכת האמיתית: כפתור "שלח תזכורת וואטסאפ לכולם"</small></div></div>`;
+  if (pend.length) al += `<div class="alert warn"><span class="dot"></span><div>${pend.length} בקשות רכש ממתינות לאישור שלך<small>${pend.map(r=>`${DEPT[r.dept]}: ${r.title} (${fmt0(r.amount)})`).join(' · ')}</small></div></div>`;
+  al += `<div class="alert good"><span class="dot"></span><div>${refunds.length} חברים מחכים להחזר, סה"כ ${fmt(-refunds.reduce((s,m)=>s+m.balance,0))}<small>הגדול ביותר: ${refunds.sort((a,b)=>a.balance-b.balance)[0].name} — ${fmt0(-refunds[0].balance)}</small></div></div>`;
+  $('#alerts').innerHTML = al;
+
+  $('#cash').innerHTML = [
+    ['נכנס', fmt(L.collected), 'דמי קמפ + מחסן, כל אמצעי התשלום'],
+    ['יצא', fmt(L.spent), 'כל ההוצאות, כולל מה שחברים שילמו מהכיס'],
+    ['נשאר לחלק', fmt(L.surplus), `${fmt0(L.surplus/L.rows.length)} ₪ לכל חבר מלא`]
+  ].map(([l,v,s])=>`<div class="kpi"><span class="label">${l}</span><span class="value">${v}</span><span class="sub">${s}</span></div>`).join('');
+}
+
+// ---------- tabs / toast / boot ----------
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b));
+  document.querySelectorAll('section.module').forEach(s=>s.classList.toggle('active', s.id==='tab-'+b.dataset.tab));
+}));
+let toastT; function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+renderParams(); renderScenario(); renderDept(); renderLedger(); renderMgmt();
+
+</script>
+</body></html>
