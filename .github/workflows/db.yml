@@ -1,0 +1,20 @@
+name: db-migrate
+# Applies new files from supabase/migrations/ to the Supabase database, in filename order.
+# Runs on every push that touches migrations, or manually (Actions tab -> db-migrate -> Run workflow).
+on:
+  push:
+    branches: [main]
+    paths: ['supabase/migrations/**', '.github/workflows/db.yml']
+  workflow_dispatch: {}
+concurrency: db-migrate
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install psql
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client >/dev/null
+      - name: Apply migrations
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash supabase/migrate.sh
