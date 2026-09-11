@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "ברנפלקס — ניהול תקציב הקמפ",
@@ -16,8 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* eslint-disable-next-line @next/next/no-page-custom-font -- root layout: applies to every page */}
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&display=swap" />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-screen flex-col">
         {children}
+        <Footer />
       </body>
     </html>
   );
