@@ -16,7 +16,7 @@ export function NavTabs({ tabs, depts }: { tabs: Tab[]; depts: Tab[] }) {
         {tabs.map((t) => <Link key={t.href} href={t.href} aria-current={active(t.href) ? "page" : undefined} className={cls(active(t.href))}>{t.label}</Link>)}
       </div>
       {depts.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1 border-t border-stone-200 py-1.5 text-xs">
+        <div className="flex items-center gap-1 overflow-x-auto border-t border-stone-200 py-1.5 text-xs md:flex-wrap">
           <span className="px-2 text-stone-400">מחלקות</span>
           {depts.map((d) => (
             <Link key={d.href} href={d.href} aria-current={active(d.href) ? "page" : undefined}

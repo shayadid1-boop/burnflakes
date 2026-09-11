@@ -119,10 +119,11 @@ export default async function ScenarioPage({ params }: { params: Promise<{ id: s
                     <td className="p-2">{d.department}</td>
                     <td className="p-2 text-left tabular-nums">{money(d.amount)}</td>
                     <td className="p-2 text-xs text-stone-400">{total ? `${Math.round(Number(d.amount) / total * 100)}%` : ""}</td>
+                    <td className="w-1/3 p-2 align-middle"><div className="bar"><i style={{ width: `${total ? Math.min(100, Number(d.amount) / total * 100) : 0}%` }} /></div></td>
                   </tr>
                 ))}
                 <tr className="border-t-2 border-stone-300 font-semibold">
-                  <td className="p-2">סה״כ</td><td className="p-2 text-left">{money(total)}</td><td />
+                  <td className="p-2">סה״כ</td><td className="p-2 text-left">{money(total)}</td><td /><td />
                 </tr>
               </tbody>
             </table>

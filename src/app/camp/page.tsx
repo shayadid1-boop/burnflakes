@@ -38,7 +38,7 @@ export default async function CampPage() {
                       <td className="p-2 tabular-nums">{money(p)}</td>
                       <td className={`p-2 tabular-nums ${over ? "font-semibold text-red-700" : ""}`}>{money(a)}</td>
                       <td className="p-2">
-                        <div className="h-2 w-full max-w-40 overflow-hidden rounded bg-stone-100"><div className={`h-2 ${over ? "bg-red-500" : "bg-green-500"}`} style={{ width: `${Math.min(100, pct ?? 0)}%` }} /></div>
+                        <div className="bar max-w-40"><i className={over ? "over" : ""} style={{ width: `${Math.min(100, pct ?? 0)}%` }} /></div>
                         <span className="text-xs text-stone-500">{pct === null ? "" : `${pct}%`}</span>
                       </td>
                     </tr>
