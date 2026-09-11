@@ -76,7 +76,7 @@ export default async function MePage() {
             {em?.attending ? <ExpenseForm departments={departments ?? []} back="/me" /> : <p className="text-sm text-stone-500">רק מי שמגיע השנה יכול לרשום הוצאות.</p>}
           </Card>
           <Card title="המשמרות שלי">
-            {shifts.length === 0 ? <p className="text-sm text-stone-500">עדיין לא נרשמת למשמרות. <a href="/camp" className="text-orange-700 underline">ללוח המשמרות</a></p> : (
+            {shifts.length === 0 ? <p className="text-sm text-stone-500">עדיין לא נרשמת למשמרות. <a href="/shifts" className="text-orange-700 underline">למסך המשמרות</a></p> : (
               <ul className="space-y-1 text-sm">
                 {shifts.map((s) => <li key={s.id} className="flex justify-between border-b border-stone-100 py-1"><span>{s.day} · {s.name}</span><span className="text-stone-500">{s.dept} {s.time}</span></li>)}
               </ul>

@@ -56,6 +56,7 @@ export async function updateEventMember(formData: FormData) {
   const { error } = await supabase.from("event_members").update({
     role: String(formData.get("role")),
     ticket_status: String(formData.get("ticket_status")), volunteer_dept: s(formData, "volunteer_dept"),
+    production_volunteer: formData.get("production_volunteer") === "on",
     participation_share: Number(formData.get("participation_share") || 1),
   }).eq("id", emId);
   fail(error);

@@ -5,6 +5,7 @@ export function Nav({ me, depts = [] }: { me: CurrentMember; depts?: { slug: str
   const tabs: { href: string; label: string }[] = [
     { href: "/me", label: "החשבון שלי" },
     { href: "/camp", label: "תקציב הקמפ" },
+    { href: "/shifts", label: "משמרות" },
   ];
   if (me.role === "admin") {
     tabs.push({ href: "/scenarios", label: "תרחישים" }, { href: "/treasury", label: "כספים" }, { href: "/dashboard", label: "לוח ניהול" }, { href: "/members", label: "חברים" });

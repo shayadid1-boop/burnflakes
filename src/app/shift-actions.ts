@@ -65,11 +65,19 @@ export async function openShifts(formData: FormData) {
   if (days.length === 0) throw new Error("צריך לפחות תאריך אחד (YYYY-MM-DD)");
   let role: { slots_per_shift: number; starts_at: string | null; ends_at: string | null } | null = null;
   if (roleId) role = (await supabase.from("shift_roles").select("slots_per_shift, starts_at, ends_at").eq("id", roleId).single()).data;
-  const rows = days.map((day) => ({
+  // time slots: "08:00-10:00, 12:00-14:00" (one shift per slot per day); empty = one shift per day at the role's / form's time
+  const slotsText = t("time_slots") ?? "";
+  const timeSlots = slotsText.split(/[\n,;]+/).map((x) => x.trim()).filter(Boolean).map((x) => {
+    const m = x.match(/^(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})$/);
+    if (!m) throw new Error(`שעות לא תקינות: ${x} (צורה: 08:00-10:00)`);
+    return { starts_at: m[1].padStart(5, "0"), ends_at: m[2].padStart(5, "0") };
+  });
+  const times = timeSlots.length ? timeSlots : [{ starts_at: t("starts_at") ?? role?.starts_at ?? null, ends_at: t("ends_at") ?? role?.ends_at ?? null }];
+  const rows = days.flatMap((day) => times.map((tm) => ({
     event_id: me.eventId, department_id: String(formData.get("department_id")), shift_role_id: roleId, day,
     title_he: t("title_he"), slots: Number(formData.get("slots") || role?.slots_per_shift || 1),
-    starts_at: t("starts_at") ?? role?.starts_at ?? null, ends_at: t("ends_at") ?? role?.ends_at ?? null, notes: t("notes"),
-  }));
+    starts_at: tm.starts_at, ends_at: tm.ends_at, notes: t("notes"),
+  })));
   fail((await supabase.from("shifts").insert(rows)).error);
   revalidatePath(String(formData.get("back")));
 }
@@ -86,5 +94,24 @@ export async function assignShift(formData: FormData) {
   const shiftId = String(formData.get("shift_id")); const emId = String(formData.get("event_member_id"));
   if (formData.get("remove") === "1") fail((await supabase.from("shift_assignments").delete().eq("shift_id", shiftId).eq("event_member_id", emId)).error);
   else fail((await supabase.from("shift_assignments").upsert({ shift_id: shiftId, event_member_id: emId })).error);
+  revalidatePath(String(formData.get("back")));
+}
+
+/** Admin: fair-share settings for the event (volunteer credit, whether credits are added to the pool). */
+export async function setShiftSettings(formData: FormData) {
+  const { me, supabase } = await lead();
+  if (me.role !== "admin") throw new Error("admin only");
+  const { error } = await supabase.from("events").update({
+    volunteer_shift_credit: Number(formData.get("volunteer_shift_credit") || 0),
+    volunteers_count_in_total: formData.get("volunteers_count_in_total") === "on",
+  }).eq("id", me.eventId);
+  fail(error);
+  revalidatePath("/shifts");
+}
+
+/** Lead/admin: delete every shift of a department on one day (undo a planning mistake in one click). */
+export async function deleteDayShifts(formData: FormData) {
+  const { me, supabase } = await lead();
+  fail((await supabase.from("shifts").delete().eq("event_id", me.eventId).eq("department_id", String(formData.get("department_id"))).eq("day", String(formData.get("day")))).error);
   revalidatePath(String(formData.get("back")));
 }

@@ -5,7 +5,6 @@ import { myDepartments, STATUS_HE, STATUS_TONE, PAID_FROM_HE } from "@/lib/data"
 import { Nav } from "@/components/nav";
 import { Card, Kpi, Btn, Pill, inputCls } from "@/components/ui";
 import { ExpenseForm } from "@/components/expense-form";
-import { ShiftManager } from "@/components/shift-manager";
 import { money, num } from "@/lib/format";
 import { setExpenseStatus, deleteExpense, recordIncome } from "@/app/money-actions";
 
@@ -139,8 +138,8 @@ export default async function DeptPage({ params }: { params: Promise<{ slug: str
             </table>
           </div>
         </Card>
-        <Card title="לוח המשמרות של המחלקה">
-          <ShiftManager eventId={me.eventId} departmentId={dept.id} people={persons} back={back} />
+        <Card title="משמרות המחלקה">
+          <p className="text-sm text-stone-500">תפקידים, פתיחת משמרות לפי ימים ושעות ושיבוץ — במסך המשמרות: <a href={`/shifts?dept=${dept.slug}`} className="font-bold text-orange-700 hover:underline">תכנון משמרות {dept.name_he}</a>.</p>
         </Card>
       </main>
     </>

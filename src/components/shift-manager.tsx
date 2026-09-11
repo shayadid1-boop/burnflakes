@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Btn, inputCls } from "@/components/ui";
 import { money } from "@/lib/format";
-import { createShiftRole, deleteShiftRole, openShifts, deleteShift, assignShift } from "@/app/shift-actions";
+import { createShiftRole, deleteShiftRole, openShifts, deleteShift, assignShift, deleteDayShifts } from "@/app/shift-actions";
 
 /** Department lead tools: shift roles, opening shifts by day, assigning people. */
 export async function ShiftManager({ eventId, departmentId, people, back }: { eventId: string; departmentId: string; people: { id: string; name: string }[]; back: string }) {
@@ -60,20 +60,24 @@ export async function ShiftManager({ eventId, departmentId, people, back }: { ev
             <input name="days" placeholder="תאריכים: 2026-11-02, 2026-11-03" dir="ltr" className={`${inputCls} col-span-2 md:col-span-3`} required />
           )}
           <input name="starts_at" type="time" className={inputCls} /><input name="ends_at" type="time" className={inputCls} />
+          <input name="time_slots" placeholder="כמה משמרות ביום? שעות מופרדות בפסיק: 08:00-10:00, 13:00-15:00, 19:00-21:00" dir="ltr" className={`${inputCls} col-span-2 md:col-span-5`} />
           <Btn variant="ghost" type="submit">פתח</Btn>
         </form>
+        <p className="mt-1 text-xs text-stone-500">בלי שעות בשדה האחרון — נפתחת משמרת אחת ביום לפי שעות התפקיד. עם שעות — משמרת לכל טווח שעות בכל יום שסומן.</p>
       </div>
 
       <div>
         <h3 className="mb-1 font-semibold">משמרות המחלקה ושיבוץ</h3>
         <table className="w-full">
           <tbody>
-            {(shifts ?? []).map((s) => {
+            {(shifts ?? []).map((s, i, arr) => {
               const role = s.shift_roles as unknown as { name_he: string } | null;
+              const firstOfDay = i === 0 || arr[i - 1].day !== s.day;
               const assigned = (s.shift_assignments as { event_member_id: string }[]).map((a) => a.event_member_id);
               return (
                 <tr key={s.id} className="border-t border-stone-100 align-top">
-                  <td className="p-2 whitespace-nowrap">{s.day}<br /><span className="text-xs text-stone-500">{s.starts_at ? `${s.starts_at.slice(0, 5)}–${s.ends_at?.slice(0, 5) ?? ""}` : ""}</span></td>
+                  <td className="p-2 whitespace-nowrap">{firstOfDay ? <b>{dayLabel(s.day)}</b> : <span className="text-stone-400">{dayLabel(s.day)}</span>}<br /><span className="text-xs text-stone-500">{s.starts_at ? `${s.starts_at.slice(0, 5)}–${s.ends_at?.slice(0, 5) ?? ""}` : ""}</span>
+                    {firstOfDay && <form action={deleteDayShifts} className="mt-1"><input type="hidden" name="department_id" value={departmentId} /><input type="hidden" name="day" value={s.day} /><input type="hidden" name="back" value={back} /><button className="text-xs text-stone-400 hover:text-red-600">מחק את כל היום</button></form>}</td>
                   <td className="p-2">{s.title_he ?? role?.name_he} <span className="text-xs text-stone-500">{assigned.length}/{s.slots}</span></td>
                   <td className="p-2">
                     <div className="flex flex-wrap gap-1">

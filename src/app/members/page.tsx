@@ -19,7 +19,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
   const [depts, { data: members }, { data: ems }, { data: leads }, { data: privates }, { data: allDepts }] = await Promise.all([
     myDepartments(me.eventId),
     supabase.from("members").select("id, first_name, last_name, email, phone, notes, is_active").order("first_name").order("last_name"),
-    supabase.from("event_members").select("id, member_id, tier, role, participation_share, attending, ticket_status, volunteer_dept").eq("event_id", me.eventId),
+    supabase.from("event_members").select("id, member_id, tier, role, participation_share, attending, ticket_status, volunteer_dept, production_volunteer").eq("event_id", me.eventId),
     supabase.from("department_leads").select("event_member_id, department_id").eq("event_id", me.eventId),
     supabase.from("member_private").select("member_id, national_id"),
     supabase.from("departments").select("id, name_he").eq("is_active", true).order("sort_order"),
@@ -102,7 +102,8 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
                                     <input type="hidden" name="event_member_id" value={em.id} />
                                     <label className="text-xs text-stone-600">תפקיד במערכת<select name="role" defaultValue={em.role} className={`${inputCls} w-full`}>{Object.entries(ROLE_HE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
                                     <label className="text-xs text-stone-600">כרטיס<select name="ticket_status" defaultValue={em.ticket_status} className={`${inputCls} w-full`}>{Object.entries(TICKET_HE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
-                                    <label className="text-xs text-stone-600">התנדבות במידברן<input name="volunteer_dept" defaultValue={em.volunteer_dept ?? ""} className={`${inputCls} w-full`} /></label>
+                                    <label className="text-xs text-stone-600">התנדבות במידברן (מחלקה)<input name="volunteer_dept" defaultValue={em.volunteer_dept ?? ""} className={`${inputCls} w-full`} /></label>
+                                    <label className="flex items-center gap-2 text-xs text-stone-600 self-end"><input type="checkbox" name="production_volunteer" defaultChecked={em.production_volunteer} /> מתנדב/ת בהפקה (זיכוי משמרת)</label>
                                     <label className="text-xs text-stone-600">חלק השתתפות (1 = מלא)<input name="participation_share" type="number" step="0.0001" defaultValue={String(em.participation_share)} className={`${inputCls} w-full`} /></label>
                                     <div className="text-xs text-stone-600">מוביל מחלקות
                                       <div className="mt-1 flex flex-wrap gap-2">

@@ -4,17 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import { myDepartments } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card } from "@/components/ui";
-import { ShiftBoard } from "@/components/shift-board";
 import { money } from "@/lib/format";
 
 export default async function CampPage() {
   const me = await requireMember();
   if (!me.eventId) redirect("/me");
   const supabase = await createClient();
-  const [depts, { data: rows }, { data: em }] = await Promise.all([
+  const [depts, { data: rows }] = await Promise.all([
     myDepartments(me.eventId),
     supabase.from("v_department_budget_vs_actual").select("*").eq("event_id", me.eventId),
-    me.memberId ? supabase.from("event_members").select("id, attending").eq("event_id", me.eventId).eq("member_id", me.memberId).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   const list = (rows ?? []).filter((r) => Number(r.planned) > 0 || Number(r.actual) > 0 || Number(r.income_planned) > 0);
   const planned = list.reduce((s, r) => s + Number(r.planned), 0);
@@ -49,10 +47,7 @@ export default async function CampPage() {
             </table>
           )}
         </Card>
-        <Card title="לוח המשמרות של הקמפ">
-          {em?.attending === false && <p className="mb-2 text-xs text-stone-500">אתה לא מסומן כמגיע השנה, אז אי אפשר להירשם.</p>}
-          <ShiftBoard eventId={me.eventId} myEmId={em?.attending ? em.id : null} back="/camp" />
-        </Card>
+        <p className="text-sm text-stone-500">המשמרות עברו למסך משלהן: <a href="/shifts" className="font-bold text-orange-700 hover:underline">משמרות</a>.</p>
       </main>
     </>
   );
