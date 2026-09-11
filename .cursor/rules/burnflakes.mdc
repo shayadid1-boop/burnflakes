@@ -6,12 +6,12 @@ alwaysApply: true
 
 ## מה הפרויקט
 מערכת ניהול תקציב ומשמרות לקמפ ברנפלקס במידברן. האיפיון המחייב: `docs/burnflakes-spec-v2.md`.
-מבנה הנתונים והלוגיקה: `supabase/schema.sql` (Postgres). נתוני אמת: `supabase/seed/*.sql`.
+מבנה הנתונים והלוגיקה: `supabase/migrations/0000_schema.sql` + המיגרציות שאחריו (0005 הרשאות, 0006 כלי תרחישים, 0007 ספר חשבונות ודמי קמפ). נתוני אמת: `supabase/migrations/000{1,2,3}_seed_*.sql`. דחיפה ל‑main מריצה מיגרציות חדשות אוטומטית בענן (GitHub Actions).
 תוכנית העבודה והמשימה הנוכחית: `docs/WORK_PLAN.md`.
 
 ## כללים
 1. לפני כל משימה קרא את `docs/burnflakes-spec-v2.md` ואת החלק הרלוונטי ב‑`supabase/schema.sql`. אל תמציא טבלאות או עמודות — הסכמה היא מקור האמת.
-2. **הלוגיקה חיה במסד הנתונים.** סיכומים, יתרות, דמי קמפ, מאזן — קוראים מה‑views ומה‑RPC (`compute_scenario`, `approve_scenario`, `v_member_ledger`, `v_scenario_summary`, `v_department_budget_vs_actual`, `v_management_dashboard`, `v_event_balance`, `v_fundraiser_net`, `v_shift_board`). אין חישוב כספי ב‑TypeScript.
+2. **הלוגיקה חיה במסד הנתונים.** סיכומים, יתרות, דמי קמפ, מאזן — קוראים מה‑views ומה‑RPC (`set_scenario_param`, `clone_scenario`, `approve_scenario_checked`, `ledger(event)`, `my_departments(event)`, `v_scenario_lines`, `v_expenses`, `v_scenario_summary`, `v_department_budget_vs_actual`, `v_management_dashboard`, `v_event_balance`, `v_fundraiser_net`, `v_shift_board`). אין חישוב כספי ב‑TypeScript.
 3. שינוי בסכמה = קובץ מיגרציה חדש ב‑`supabase/migrations/` (לא עריכה של schema.sql) + מדיניות RLS + רענון טיפוסים.
 4. עברית RTL בכל מסך: `dir="rtl"` בשורש, מספרים ב‑`tabular-nums`, מטבע ₪, שמות באנגלית רק בקוד.
 5. סטאק: Next.js (App Router) + TypeScript + Tailwind + shadcn/ui + Supabase (auth, RLS). אין ספריות נוספות בלי סיבה.
@@ -21,3 +21,10 @@ alwaysApply: true
 9. אל תמחק ואל תשנה נתוני seed. אל תריץ reset על מסד הנתונים בענן. סודות רק ב‑`.env.local` (לא בגיט).
 10. צעדים קטנים: משימה אחת מהגאנט, בדיקה אחת, commit אחד עם קוד המשימה בהודעה (למשל `w1t4: scenario builder`).
 11. כשמשהו לא ברור באיפיון — עצור ושאל, אל תנחש.
+
+## מבנה הקוד (נכון ל‑11.9.2026)
+- `src/lib/auth.ts` — `requireMember()`: המשתמש המחובר + החבר לפי מייל + התפקיד באירוע הנוכחי (האירוע האחרון שלא סגור).
+- `src/lib/supabase/{server,client}.ts` — לקוחות Supabase; `src/proxy.ts` מרענן את הסשן.
+- מסכים: `/login` `/me` `/camp` `/dept/[slug]` `/scenarios` `/scenarios/[id]` `/treasury` `/dashboard` `/members` `/export`.
+- פעולות שרת: `src/app/scenarios/actions.ts`, `src/app/money-actions.ts`, `src/app/shift-actions.ts`, `src/app/members/actions.ts`. כל טופס = server action + `revalidatePath`.
+- רכיבים: `components/nav.tsx`, `ui.tsx`, `expense-form.tsx`, `shift-board.tsx`, `shift-manager.tsx`.

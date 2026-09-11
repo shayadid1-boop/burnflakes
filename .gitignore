@@ -9,3 +9,5 @@ node_modules/
 
 # Cowork session outputs (not part of the app)
 Claude outputs/
+tsconfig.tsbuildinfo
+src/app/favicon.ico
