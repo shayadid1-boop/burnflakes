@@ -36,8 +36,8 @@ export default async function PodcastPage({ searchParams }: { searchParams: Prom
         {playing && (
           <Card lift title={playing.title_he}>
             {playing.description_he && <p className="mb-3 text-sm text-stone-600">{playing.description_he}</p>}
-            <iframe src={`https://drive.google.com/file/d/${playing.drive_file_id}/preview`} allow="autoplay" className="h-20 w-full rounded-lg border border-stone-200 bg-white" title={playing.title_he} />
-            <p className="mt-2 text-xs text-stone-400">לא מתנגן? <a href={`https://drive.google.com/file/d/${playing.drive_file_id}/view`} target="_blank" rel="noopener" className="underline">פתח בדרייב</a></p>
+            <iframe src={`https://drive.google.com/file/d/${playing.drive_file_id}/preview`} allow="autoplay" className={`${Number(playing.file_size) > 100 * 1048576 ? "h-72" : "h-24"} w-full rounded-lg border border-stone-200 bg-white`} title={playing.title_he} />
+            <p className="mt-2 text-xs text-stone-400">{Number(playing.file_size) > 100 * 1048576 && "קובץ גדול — גוגל מציג אזהרה, לוחצים Play anyway והפרק מתנגן. "}לא מתנגן? <a href={`https://drive.google.com/file/d/${playing.drive_file_id}/view`} target="_blank" rel="noopener" className="underline">פתח בדרייב</a></p>
           </Card>
         )}
 
