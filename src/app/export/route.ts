@@ -22,8 +22,9 @@ export async function GET() {
   const ledger = await supabase.rpc("ledger", { p_event: me.eventId });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ledger.data ?? []), "ledger");
 
-  for (const name of [...VIEWS, ...TABLES]) {
-    const { data, error } = await supabase.from(name).select("*").limit(10000);
+  // all tables in parallel (sequential took ~8s)
+  const results = await Promise.all([...VIEWS, ...TABLES].map(async (name) => ({ name, ...(await supabase.from(name).select("*").limit(10000)) })));
+  for (const { name, data, error } of results) {
     if (error) continue;
     const rows = (data ?? []).map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v !== null && typeof v === "object" ? JSON.stringify(v) : v])));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.length ? rows : [{ empty: true }]), name.slice(0, 31));
