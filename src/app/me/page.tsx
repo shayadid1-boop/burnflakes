@@ -101,7 +101,10 @@ export default async function MePage() {
           </table>
         </Card>
 
-        <form action="/auth/signout" method="post"><button className="text-sm text-stone-500 underline">יציאה</button></form>
+        <div className="flex gap-4 text-sm text-stone-500">
+          <a href="/set-password" className="underline">שינוי סיסמה</a>
+          <form action="/auth/signout" method="post"><button className="underline">יציאה</button></form>
+        </div>
       </main>
     </>
   );
