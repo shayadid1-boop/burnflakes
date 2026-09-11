@@ -19,7 +19,7 @@ export async function createMember(formData: FormData) {
   }).select("id").single();
   fail(error);
   if (formData.get("attending") === "on") {
-    const { error: e2 } = await supabase.from("event_members").insert({ event_id: me.eventId, member_id: data!.id, tier: s(formData, "tier") ?? "friend", role: "member", attending: true });
+    const { error: e2 } = await supabase.from("event_members").insert({ event_id: me.eventId, member_id: data!.id, tier: "friend", role: "member", attending: true });
     fail(e2);
   }
   revalidatePath("/members");
@@ -54,7 +54,7 @@ export async function updateEventMember(formData: FormData) {
   const { me, supabase } = await admin();
   const emId = String(formData.get("event_member_id"));
   const { error } = await supabase.from("event_members").update({
-    tier: String(formData.get("tier")), role: String(formData.get("role")),
+    role: String(formData.get("role")),
     ticket_status: String(formData.get("ticket_status")), volunteer_dept: s(formData, "volunteer_dept"),
     participation_share: Number(formData.get("participation_share") || 1),
   }).eq("id", emId);

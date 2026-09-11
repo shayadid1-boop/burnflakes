@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { myDepartments, STATUS_HE, PAID_FROM_HE, METHOD_HE, TIER_HE } from "@/lib/data";
+import { myDepartments, STATUS_HE, PAID_FROM_HE, METHOD_HE } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card, Btn, inputCls } from "@/components/ui";
 import { money, money2, num } from "@/lib/format";
@@ -74,15 +74,14 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-stone-500"><tr className="text-right">
-                <th className="p-2 font-normal">חבר</th><th className="p-2 font-normal">מעמד</th><th className="p-2 font-normal">חוב</th><th className="p-2 font-normal">שילם</th><th className="p-2 font-normal">מהכיס</th><th className="p-2 font-normal">חלק בעודף</th><th className="p-2 font-normal">הוחזר</th><th className="p-2 font-normal">יתרה</th><th className="p-2 font-normal"></th>
+                <th className="p-2 font-normal">חבר</th><th className="p-2 font-normal">חוב</th><th className="p-2 font-normal">שילם</th><th className="p-2 font-normal">מהכיס</th><th className="p-2 font-normal">חלק בעודף</th><th className="p-2 font-normal">הוחזר</th><th className="p-2 font-normal">יתרה</th><th className="p-2 font-normal"></th>
               </tr></thead>
               <tbody>
                 {shown.map((r) => {
                   const b = Number(r.balance);
                   return (
                     <tr key={r.event_member_id} className="border-t border-stone-100">
-                      <td className="p-2 whitespace-nowrap">{r.first_name} {r.last_name}</td>
-                      <td className="p-2 text-xs text-stone-500">{TIER_HE[r.tier]}{Number(r.participation_share) !== 1 && ` ×${r.participation_share}`}</td>
+                      <td className="p-2 whitespace-nowrap">{r.first_name} {r.last_name}{Number(r.participation_share) !== 1 && <span className="text-xs text-stone-500"> ×{r.participation_share}</span>}</td>
                       <td className="p-2 tabular-nums">{money2(r.due)}</td><td className="p-2 tabular-nums">{money2(r.paid)}</td><td className="p-2 tabular-nums">{money2(r.fronted)}</td>
                       <td className="p-2 tabular-nums">{money2(r.surplus_share)}</td><td className="p-2 tabular-nums">{money2(r.paid_out)}</td>
                       <td className={`p-2 tabular-nums font-semibold ${b > 0 ? "text-red-700" : b < 0 ? "text-green-700" : ""}`}>{b > 0 ? `חייב ${money2(b)}` : b < 0 ? `להחזיר ${money2(-b)}` : "מאוזן"}</td>

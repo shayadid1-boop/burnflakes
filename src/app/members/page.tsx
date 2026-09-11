@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { redirect } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { myDepartments, TIER_HE } from "@/lib/data";
+import { myDepartments } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card, Btn, inputCls } from "@/components/ui";
 import { num } from "@/lib/format";
@@ -59,7 +59,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
         <Card>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-stone-500"><tr className="text-right"><th className="p-2 font-normal">שם</th><th className="p-2 font-normal">מייל</th><th className="p-2 font-normal">טלפון</th><th className="p-2 font-normal">מגיע</th><th className="p-2 font-normal">מעמד</th><th className="p-2 font-normal">תפקיד</th><th className="p-2 font-normal">מוביל</th><th className="p-2 font-normal">כרטיס</th><th className="p-2 font-normal"></th></tr></thead>
+              <thead className="text-stone-500"><tr className="text-right"><th className="p-2 font-normal">שם</th><th className="p-2 font-normal">מייל</th><th className="p-2 font-normal">טלפון</th><th className="p-2 font-normal">מגיע</th><th className="p-2 font-normal">תפקיד</th><th className="p-2 font-normal">מוביל</th><th className="p-2 font-normal">כרטיס</th><th className="p-2 font-normal"></th></tr></thead>
               <tbody>
                 {list.map((m) => {
                   const em = emOf.get(m.id);
@@ -77,7 +77,6 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
                             <button className={`rounded-full px-2 py-0.5 text-xs ${em?.attending ? "bg-green-100 text-green-800" : "bg-stone-100 text-stone-500"}`}>{em?.attending ? "מגיע ✓" : "לא"}</button>
                           </form>
                         </td>
-                        <td className="p-2 text-xs">{em ? TIER_HE[em.tier] : ""}</td>
                         <td className="p-2 text-xs">{em ? ROLE_HE[em.role] : ""}</td>
                         <td className="p-2 text-xs">{em ? (leadsOf.get(em.id) ?? []).map((d) => deptName.get(d)).join(", ") : ""}</td>
                         <td className="p-2 text-xs">{em ? TICKET_HE[em.ticket_status] : ""}</td>
@@ -101,7 +100,6 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
                                 {em && (
                                   <form action={updateEventMember} className="grid grid-cols-2 gap-2 text-sm">
                                     <input type="hidden" name="event_member_id" value={em.id} />
-                                    <label className="text-xs text-stone-600">מעמד<select name="tier" defaultValue={em.tier} className={`${inputCls} w-full`}>{Object.entries(TIER_HE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
                                     <label className="text-xs text-stone-600">תפקיד במערכת<select name="role" defaultValue={em.role} className={`${inputCls} w-full`}>{Object.entries(ROLE_HE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
                                     <label className="text-xs text-stone-600">כרטיס<select name="ticket_status" defaultValue={em.ticket_status} className={`${inputCls} w-full`}>{Object.entries(TICKET_HE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
                                     <label className="text-xs text-stone-600">התנדבות במידברן<input name="volunteer_dept" defaultValue={em.volunteer_dept ?? ""} className={`${inputCls} w-full`} /></label>
@@ -139,7 +137,6 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
             <input name="last_name" placeholder="שם משפחה" className={inputCls} />
             <input name="email" type="email" dir="ltr" placeholder="מייל" className={inputCls} />
             <input name="phone" dir="ltr" placeholder="טלפון" className={inputCls} />
-            <select name="tier" className={inputCls} defaultValue="friend">{Object.entries(TIER_HE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
             <label className="flex items-center gap-2 text-xs"><input type="checkbox" name="attending" defaultChecked /> מגיע השנה</label>
             <input name="notes" placeholder="הערות" className={`${inputCls} col-span-2 md:col-span-5`} />
             <Btn type="submit">+ הוסף</Btn>

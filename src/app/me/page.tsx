@@ -1,6 +1,6 @@
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { myDepartments, STATUS_HE, TIER_HE } from "@/lib/data";
+import { myDepartments, STATUS_HE } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card } from "@/components/ui";
 import { ExpenseForm } from "@/components/expense-form";
@@ -51,7 +51,7 @@ export default async function MePage() {
       <main className="mx-auto w-full max-w-3xl space-y-6 p-4">
         <div className="flex items-baseline justify-between">
           <h1 className="text-2xl font-bold">שלום {me.firstName} 👋</h1>
-          <span className="text-sm text-stone-500">{me.eventName} · {me.role ? ROLE_HE[me.role] : "לא רשום השנה"}{em ? ` · ${TIER_HE[em.tier]}` : ""}</span>
+          <span className="text-sm text-stone-500">{me.eventName} · {me.role ? ROLE_HE[me.role] : "לא רשום השנה"}</span>
         </div>
 
         {em && (
