@@ -2,9 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { myDepartments } from "@/lib/data";
+import { myDepartments, STATUS_TONE } from "@/lib/data";
 import { Nav } from "@/components/nav";
-import { Card, Btn, inputCls } from "@/components/ui";
+import { Card, Btn, Pill, inputCls } from "@/components/ui";
 import { money, money2, num } from "@/lib/format";
 import { newScenario, cloneScenario, approveScenario } from "./actions";
 
@@ -60,7 +60,7 @@ export default async function ScenariosPage() {
                             <td className="p-2">
                               <Link href={`/scenarios/${s.id}`} className="font-medium text-orange-700 hover:underline">{s.name}</Link>
                             </td>
-                            <td className="p-2">{STATUS_HE[s.status] ?? s.status}</td>
+                            <td className="p-2"><Pill tone={STATUS_TONE[s.status] ?? "muted"}>{STATUS_HE[s.status] ?? s.status}</Pill></td>
                             <td className="p-2">{num(r?.member_count)}</td>
                             <td className="p-2">{money(r?.total)}</td>
                             <td className="p-2">{r?.buffer_pct ? `${num(r.buffer_pct)}%` : ""}{Number(r?.buffer_amount) > 0 ? ` + ${money(r?.buffer_amount)}` : ""}</td>

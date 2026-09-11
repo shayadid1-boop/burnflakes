@@ -24,8 +24,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-sm p-6 space-y-6">
-      <h1 className="text-2xl font-bold">כניסה לברנפלקס</h1>
+    <main className="mx-auto w-full max-w-sm p-6 pt-16 space-y-6">
+      <div className="space-y-1">
+        <div className="font-serif text-3xl font-bold">ברנפלקס</div>
+        <h1 className="text-lg font-normal text-stone-500">כניסה לניהול תקציב הקמפ</h1>
+      </div>
       {status === "sent" ? (
         <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-green-900">
           שלחנו קישור כניסה ל‑<b dir="ltr">{email}</b>. פתח את המייל ולחץ על הקישור
@@ -48,7 +51,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={status === "sending"}
-            className="w-full rounded-lg bg-orange-600 p-3 font-semibold text-white disabled:opacity-50"
+            className="w-full rounded-lg bg-orange-600 p-3 font-bold text-white hover:bg-orange-700 disabled:opacity-50"
           >
             {status === "sending" ? "שולח…" : "שלח לי קישור כניסה"}
           </button>

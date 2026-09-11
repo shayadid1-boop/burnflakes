@@ -4,7 +4,7 @@ import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { myDepartments } from "@/lib/data";
 import { Nav } from "@/components/nav";
-import { Card } from "@/components/ui";
+import { Card, Kpi } from "@/components/ui";
 import { money, num } from "@/lib/format";
 
 type Ledger = { first_name: string; last_name: string | null; due: number; paid: number; balance: number };
@@ -38,11 +38,11 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid gap-3 md:grid-cols-5">
-          <Card><div className="text-xs text-stone-500">תקציב מאושר</div><div className="text-lg font-bold">{money(dash?.planned_total)}</div></Card>
-          <Card><div className="text-xs text-stone-500">הוצא בפועל</div><div className="text-lg font-bold">{money(dash?.actual_total)}</div></Card>
-          <Card><div className="text-xs text-stone-500">נגבה מחברים</div><div className="text-lg font-bold">{money(dash?.collected_total)}</div></Card>
-          <Card><div className="text-xs text-stone-500">הכנסות אחרות</div><div className="text-lg font-bold">{money(dash?.other_income_total)}</div></Card>
-          <Card className={Number(dash?.net_result ?? 0) >= 0 ? "bg-green-50" : "bg-red-50"}><div className="text-xs text-stone-500">תוצאה נטו</div><div className="text-lg font-bold">{money(dash?.net_result)}</div></Card>
+          <Kpi label="תקציב מאושר" value={money(dash?.planned_total)} />
+          <Kpi label="הוצא בפועל" value={money(dash?.actual_total)} />
+          <Kpi label="נגבה מחברים" value={money(dash?.collected_total)} />
+          <Kpi label="הכנסות אחרות" value={money(dash?.other_income_total)} />
+          <Kpi label="תוצאה נטו" value={money(dash?.net_result)} tone={Number(dash?.net_result ?? 0) >= 0 ? "good" : "bad"} />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">

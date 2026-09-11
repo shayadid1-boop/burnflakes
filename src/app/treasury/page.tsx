@@ -3,7 +3,7 @@ import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { myDepartments, STATUS_HE, PAID_FROM_HE, METHOD_HE } from "@/lib/data";
 import { Nav } from "@/components/nav";
-import { Card, Btn, inputCls } from "@/components/ui";
+import { Card, Kpi, Btn, inputCls } from "@/components/ui";
 import { money, money2, num } from "@/lib/format";
 import { setExpenseStatus, recordPayment, recordPayout, recordIncome } from "@/app/money-actions";
 
@@ -37,11 +37,11 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
         <h1 className="text-2xl font-bold">כספים · {me.eventName}</h1>
 
         <div className="grid gap-3 md:grid-cols-5">
-          <Card><div className="text-xs text-stone-500">דמי קמפ צפויים</div><div className="text-lg font-bold">{money(totals.due)}</div></Card>
-          <Card><div className="text-xs text-stone-500">נגבה</div><div className="text-lg font-bold">{money(totals.paid)}</div></Card>
-          <Card><div className="text-xs text-stone-500">הוצאות מהכיס של חברים</div><div className="text-lg font-bold">{money(totals.fronted)}</div></Card>
-          <Card className="bg-red-50"><div className="text-xs text-stone-500">עוד לא שולם</div><div className="text-lg font-bold text-red-700">{money(totals.owe)}</div></Card>
-          <Card className="bg-green-50"><div className="text-xs text-stone-500">החזרים לביצוע</div><div className="text-lg font-bold text-green-700">{money(totals.refund)}</div></Card>
+          <Kpi label="דמי קמפ צפויים" value={money(totals.due)} />
+          <Kpi label="נגבה" value={money(totals.paid)} />
+          <Kpi label="הוצאות מהכיס של חברים" value={money(totals.fronted)} />
+          <Kpi label="עוד לא שולם" value={money(totals.owe)} tone="bad" />
+          <Kpi label="החזרים לביצוע" value={money(totals.refund)} tone="good" />
         </div>
 
         {(pending ?? []).length > 0 && (

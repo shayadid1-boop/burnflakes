@@ -4,7 +4,7 @@ import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { myDepartments } from "@/lib/data";
 import { Nav } from "@/components/nav";
-import { Card, Btn, inputCls } from "@/components/ui";
+import { Card, Kpi, Btn, inputCls } from "@/components/ui";
 import { money, money2, num } from "@/lib/format";
 import { setAllParams, overrideLine, resetLine, addManualLine, addIncome, deleteIncome, cloneScenario, approveScenario, renameScenario, deleteScenario } from "../actions";
 
@@ -75,10 +75,10 @@ export default async function ScenarioPage({ params }: { params: Promise<{ id: s
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
-          <Card><div className="text-xs text-stone-500">סך הוצאות</div><div className="text-xl font-bold">{money(total)}</div></Card>
-          <Card><div className="text-xs text-stone-500">רזרבה</div><div className="text-xl font-bold">{money(buffer)}</div></Card>
-          <Card><div className="text-xs text-stone-500">הכנסות אחרות</div><div className="text-xl font-bold">− {money(otherIncome)}</div></Card>
-          <Card className="border-orange-300 bg-orange-50"><div className="text-xs text-stone-600">דמי קמפ לחבר ({num(summary?.member_count)} חברים)</div><div className="text-xl font-bold text-orange-800">{money2(summary?.dues_per_member)}</div></Card>
+          <Kpi label="סך הוצאות" value={money(total)} />
+          <Kpi label="רזרבה" value={money(buffer)} />
+          <Kpi label="הכנסות אחרות" value={<>− {money(otherIncome)}</>} />
+          <Kpi label={`דמי קמפ לחבר (${num(summary?.member_count)} חברים)`} value={money2(summary?.dues_per_member)} tone="accent" />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">

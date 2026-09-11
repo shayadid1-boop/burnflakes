@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { myDepartments, STATUS_HE, PAID_FROM_HE } from "@/lib/data";
+import { myDepartments, STATUS_HE, STATUS_TONE, PAID_FROM_HE } from "@/lib/data";
 import { Nav } from "@/components/nav";
-import { Card, Btn, inputCls } from "@/components/ui";
+import { Card, Kpi, Btn, Pill, inputCls } from "@/components/ui";
 import { ExpenseForm } from "@/components/expense-form";
 import { ShiftManager } from "@/components/shift-manager";
 import { money, num } from "@/lib/format";
@@ -50,9 +50,9 @@ export default async function DeptPage({ params }: { params: Promise<{ slug: str
         <h1 className="text-2xl font-bold">{dept.name_he}</h1>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card><div className="text-xs text-stone-500">תקציב מאושר</div><div className="text-xl font-bold">{money(planned)}</div></Card>
-          <Card className={over ? "border-red-300 bg-red-50" : ""}><div className="text-xs text-stone-500">הוצא בפועל</div><div className={`text-xl font-bold ${over ? "text-red-700" : ""}`}>{money(actual)}</div></Card>
-          <Card><div className="text-xs text-stone-500">יתרה</div><div className={`text-xl font-bold ${over ? "text-red-700" : "text-green-700"}`}>{money(planned - actual)}</div></Card>
+          <Kpi label="תקציב מאושר" value={money(planned)} />
+          <Kpi label="הוצא בפועל" value={money(actual)} tone={over ? "bad" : ""} />
+          <Kpi label="יתרה" value={money(planned - actual)} tone={over ? "bad" : "good"} />
         </div>
         {planned === 0 && <p className="text-sm text-amber-700">עדיין אין תקציב מאושר לשנה הזו — המנהל צריך לאשר תרחיש.</p>}
 
@@ -118,7 +118,7 @@ export default async function DeptPage({ params }: { params: Promise<{ slug: str
                     <td className="p-2">{x.paid_by} <span className="text-xs text-stone-400">{PAID_FROM_HE[x.paid_from]}</span></td>
                     <td className="p-2 text-stone-500">{x.budget_line ?? "לא מתוכנן"}</td>
                     <td className="p-2 tabular-nums">{money(x.amount)}</td>
-                    <td className="p-2">{STATUS_HE[x.status]}</td>
+                    <td className="p-2"><Pill tone={STATUS_TONE[x.status] ?? "muted"}>{STATUS_HE[x.status]}</Pill></td>
                     <td className="p-2">
                       <div className="flex gap-1">
                         {x.status === "pending" && (

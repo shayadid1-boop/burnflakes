@@ -1,26 +1,103 @@
 @import "tailwindcss";
 
+/* ---- Burnflakes look (same language as the demo): warm paper, amber accent, serif headings ---- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #F4F2EC; --surface: #FFFFFF; --surface2: #EDEAE2; --ink: #1E2229; --muted: #6B7078; --line: #DCD9D0;
+  --accent: #B8741A; --accent-ink: #7A4B0C; --accent-soft: #F6E7CF;
+  --plan: #4453A6; --plan-soft: #E3E6F6;
+  --good: #2E7D4F; --good-soft: #DDF0E4; --bad: #B4321E; --bad-soft: #F8DDD8; --warn: #9A6A00; --warn-soft: #FBEFC8;
+  --radius: 10px; --shadow: 0 1px 2px rgba(30,34,41,.06), 0 8px 24px -12px rgba(30,34,41,.18);
 }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #151719; --surface: #1E2126; --surface2: #262A31; --ink: #E8E4DA; --muted: #9AA0A8; --line: #30343C;
+  --accent: #E2A345; --accent-ink: #F3C77C; --accent-soft: #3A2D14;
+  --plan: #8B96E0; --plan-soft: #262B47;
+  --good: #5FBF88; --good-soft: #173324; --bad: #F08A78; --bad-soft: #3D1A14; --warn: #E5B94A; --warn-soft: #3A2F0E;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}}
 
+/* Map the Tailwind palette the pages already use onto the theme, so every screen picks up the look at once. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Assistant", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-serif: "Frank Ruhl Libre", "Times New Roman", serif;
+
+  --color-white: var(--surface);
+  --color-stone-50: var(--bg);
+  --color-stone-100: var(--surface2);
+  --color-stone-200: var(--line);
+  --color-stone-300: var(--line);
+  --color-stone-400: var(--muted);
+  --color-stone-500: var(--muted);
+  --color-stone-600: var(--muted);
+  --color-stone-700: var(--ink);
+  --color-stone-800: var(--ink);
+  --color-stone-900: var(--ink);
+
+  --color-orange-50: var(--accent-soft);
+  --color-orange-100: var(--accent-soft);
+  --color-orange-300: var(--accent);
+  --color-orange-600: var(--accent);
+  --color-orange-700: var(--accent-ink);
+  --color-orange-800: var(--accent-ink);
+
+  --color-green-50: var(--good-soft);
+  --color-green-100: var(--good-soft);
+  --color-green-200: var(--good);
+  --color-green-500: var(--good);
+  --color-green-700: var(--good);
+  --color-green-800: var(--good);
+  --color-green-900: var(--good);
+
+  --color-red-50: var(--bad-soft);
+  --color-red-300: var(--bad);
+  --color-red-500: var(--bad);
+  --color-red-600: var(--bad);
+  --color-red-700: var(--bad);
+  --color-red-800: var(--bad);
+
+  --color-amber-50: var(--warn-soft);
+  --color-amber-200: var(--warn);
+  --color-amber-300: var(--warn);
+  --color-amber-700: var(--warn);
+  --color-amber-800: var(--warn);
+  --color-amber-900: var(--warn);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html { direction: rtl; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-sans); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums;
 }
+h1, h2, h3 { font-family: var(--font-serif); font-weight: 700; line-height: 1.2; text-wrap: balance; }
+h1 { font-size: 26px; } h2 { font-size: 20px; } h3 { font-size: 17px; }
+
+/* tables: the demo's quiet grid */
+table { border-collapse: collapse; }
+thead th { font-size: 12px; letter-spacing: .04em; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--line); }
+tbody td { border-bottom: 1px solid var(--line); vertical-align: top; }
+tbody tr:last-child td { border-bottom: 0; }
+.tabular-nums { direction: ltr; text-align: left; white-space: nowrap; }
+
+/* form controls */
+input, select, textarea { font: inherit; color: var(--ink); background: var(--surface); }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
+input[type="checkbox"], input[type="range"] { accent-color: var(--accent); }
+button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* reusable pieces */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.panel.lift { box-shadow: var(--shadow); }
+.kpi { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.kpi .label { font-size: 12px; letter-spacing: .05em; color: var(--muted); font-weight: 700; }
+.kpi .value { font-family: var(--font-serif); font-size: 26px; font-weight: 700; line-height: 1.1; }
+.kpi .sub { font-size: 13px; color: var(--muted); }
+.kpi.accent { background: var(--accent-soft); border-color: transparent; } .kpi.accent .value { color: var(--accent-ink); }
+.kpi.good { background: var(--good-soft); border-color: transparent; } .kpi.good .value { color: var(--good); }
+.kpi.bad { background: var(--bad-soft); border-color: transparent; } .kpi.bad .value { color: var(--bad); }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.pill.good { background: var(--good-soft); color: var(--good); } .pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.plan { background: var(--plan-soft); color: var(--plan); } .pill.muted { background: var(--surface2); color: var(--muted); }
+.bar { height: 8px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--plan); border-radius: 999px; } .bar i.over { background: var(--bad); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

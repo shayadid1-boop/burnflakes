@@ -1,8 +1,8 @@
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { myDepartments, STATUS_HE } from "@/lib/data";
+import { myDepartments, STATUS_HE, STATUS_TONE } from "@/lib/data";
 import { Nav } from "@/components/nav";
-import { Card } from "@/components/ui";
+import { Card, Pill } from "@/components/ui";
 import { ExpenseForm } from "@/components/expense-form";
 import { money, money2 } from "@/lib/format";
 import { deleteExpense } from "@/app/money-actions";
@@ -92,7 +92,7 @@ export default async function MePage() {
                   <td className="p-2 whitespace-nowrap text-stone-500">{x.expense_date}</td>
                   <td className="p-2">{x.description} <span className="text-xs text-stone-400">· {x.department}</span></td>
                   <td className="p-2 tabular-nums">{money(x.amount)}</td>
-                  <td className="p-2 text-xs">{STATUS_HE[x.status]}</td>
+                  <td className="p-2"><Pill tone={STATUS_TONE[x.status] ?? "muted"}>{STATUS_HE[x.status]}</Pill></td>
                   <td className="p-2">{x.status === "pending" && <form action={deleteExpense}><input type="hidden" name="id" value={x.id} /><input type="hidden" name="back" value="/me" /><button className="text-xs text-stone-400 hover:underline">מחק</button></form>}</td>
                 </tr>
               ))}
