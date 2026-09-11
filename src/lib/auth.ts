@@ -41,6 +41,11 @@ export async function requireMember(): Promise<CurrentMember> {
       .maybeSingle();
     role = em?.role ?? null;
   }
+  if (!role && event) {
+    // fallback: the DB's own security-definer helper (same logic RLS uses)
+    const { data: r } = await supabase.rpc("my_role", { p_event: event.id });
+    role = (r as CurrentMember["role"]) ?? null;
+  }
 
   return {
     userEmail: user.email,
