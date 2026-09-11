@@ -61,7 +61,7 @@ export async function openShifts(formData: FormData) {
   const { me, supabase } = await lead();
   const t = (k: string) => String(formData.get(k) ?? "").trim() || null;
   const roleId = t("shift_role_id");
-  const days = String(formData.get("days") ?? "").split(/[\s,]+/).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
+  const days = formData.getAll("days").flatMap((v) => String(v).split(/[\s,]+/)).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
   if (days.length === 0) throw new Error("צריך לפחות תאריך אחד (YYYY-MM-DD)");
   let role: { slots_per_shift: number; starts_at: string | null; ends_at: string | null } | null = null;
   if (roleId) role = (await supabase.from("shift_roles").select("slots_per_shift, starts_at, ends_at").eq("id", roleId).single()).data;

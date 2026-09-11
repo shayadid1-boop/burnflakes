@@ -6,10 +6,17 @@ import { createShiftRole, deleteShiftRole, openShifts, deleteShift, assignShift 
 /** Department lead tools: shift roles, opening shifts by day, assigning people. */
 export async function ShiftManager({ eventId, departmentId, people, back }: { eventId: string; departmentId: string; people: { id: string; name: string }[]; back: string }) {
   const supabase = await createClient();
-  const [{ data: roles }, { data: shifts }] = await Promise.all([
+  const [{ data: roles }, { data: shifts }, { data: ev }] = await Promise.all([
     supabase.from("shift_roles").select("id, name_he, description_he, slots_per_shift, starts_at, ends_at, budget_amount").eq("event_id", eventId).eq("department_id", departmentId).order("name_he"),
     supabase.from("shifts").select("id, day, title_he, slots, starts_at, ends_at, shift_roles(name_he), shift_assignments(event_member_id)").eq("event_id", eventId).eq("department_id", departmentId).order("day").order("starts_at"),
+    supabase.from("events").select("starts_on, ends_on").eq("id", eventId).maybeSingle(),
   ]);
+  // every day of the event (build days + event days) as checkboxes
+  const eventDays: string[] = [];
+  if (ev?.starts_on && ev?.ends_on) {
+    for (let d = new Date(ev.starts_on + "T00:00:00Z"); d.toISOString().slice(0, 10) <= ev.ends_on; d.setUTCDate(d.getUTCDate() + 1)) eventDays.push(d.toISOString().slice(0, 10));
+  }
+  const dayLabel = (iso: string) => { const [y, m, d] = iso.split("-"); void y; return `${d}.${m}`; };
   const nameOf = new Map(people.map((p) => [p.id, p.name]));
 
   return (
@@ -45,7 +52,13 @@ export async function ShiftManager({ eventId, departmentId, people, back }: { ev
           </select>
           <input name="title_he" placeholder="כותרת (למשל: העמסת המשאית)" className={`${inputCls} col-span-2`} />
           <input name="slots" type="number" min="1" placeholder="מקומות" className={inputCls} />
-          <input name="days" placeholder="תאריכים: 2026-11-20, 2026-11-21" dir="ltr" className={`${inputCls} col-span-2 md:col-span-3`} required />
+          {eventDays.length > 0 ? (
+            <div className="col-span-2 flex flex-wrap gap-2 md:col-span-3">
+              {eventDays.map((d) => <label key={d} className="flex items-center gap-1 text-xs"><input type="checkbox" name="days" value={d} />{dayLabel(d)}</label>)}
+            </div>
+          ) : (
+            <input name="days" placeholder="תאריכים: 2026-11-02, 2026-11-03" dir="ltr" className={`${inputCls} col-span-2 md:col-span-3`} required />
+          )}
           <input name="starts_at" type="time" className={inputCls} /><input name="ends_at" type="time" className={inputCls} />
           <Btn variant="ghost" type="submit">פתח</Btn>
         </form>

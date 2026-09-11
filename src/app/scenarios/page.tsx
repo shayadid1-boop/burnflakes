@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { myDepartments } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card, Btn, inputCls } from "@/components/ui";
 import { money, money2, num } from "@/lib/format";
@@ -13,6 +14,7 @@ export default async function ScenariosPage() {
   const me = await requireMember();
   if (me.role !== "admin") redirect("/me");
   const supabase = await createClient();
+  const depts = me.eventId ? await myDepartments(me.eventId) : [];
 
   const [{ data: events }, { data: rows }] = await Promise.all([
     supabase.from("events").select("id, name, year, status").order("year", { ascending: false }),
@@ -23,7 +25,7 @@ export default async function ScenariosPage() {
 
   return (
     <>
-      <Nav me={me} />
+      <Nav me={me} depts={depts} />
       <main className="mx-auto w-full max-w-5xl space-y-6 p-4">
         <h1 className="text-2xl font-bold">תרחישי תקציב</h1>
         <p className="text-sm text-stone-600">

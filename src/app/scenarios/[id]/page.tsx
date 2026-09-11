@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { myDepartments } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card, Btn, inputCls } from "@/components/ui";
 import { money, money2, num } from "@/lib/format";
@@ -19,6 +20,7 @@ export default async function ScenarioPage({ params }: { params: Promise<{ id: s
   const { data: scenario } = await supabase.from("scenarios").select("id, name, status, event_id, computed_at, events(name, year)").eq("id", id).maybeSingle();
   if (!scenario) notFound();
   const frozen = scenario.status === "approved";
+  const depts = await myDepartments(scenario.event_id);
 
   const [{ data: params_ }, { data: options }, { data: values }, { data: summary }, { data: byDept }, { data: lines }, { data: incomes }, { data: departments }] =
     await Promise.all([
@@ -39,7 +41,7 @@ export default async function ScenarioPage({ params }: { params: Promise<{ id: s
 
   return (
     <>
-      <Nav me={me} />
+      <Nav me={me} depts={depts} />
       <main className="mx-auto w-full max-w-5xl space-y-6 p-4">
         <div className="flex flex-wrap items-center gap-3">
           <Link href="/scenarios" className="text-sm text-stone-500 hover:underline">← כל התרחישים</Link>
@@ -87,7 +89,7 @@ export default async function ScenarioPage({ params }: { params: Promise<{ id: s
                 const current = valueOf.get(p.id) ?? p.default_value;
                 const name = `param:${p.key}:${p.value_type}`;
                 return (
-                  <label key={p.id} className="block space-y-1 text-sm">
+                  <label key={`${p.id}:${String(current)}`} className="block space-y-1 text-sm">
                     <span className="text-stone-600">{p.label_he}</span>
                     {p.value_type === "enum" ? (
                       <select name={name} defaultValue={String(current)} disabled={frozen} className={`${inputCls} w-full`}>
