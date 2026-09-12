@@ -113,3 +113,32 @@ export async function recordIncome(formData: FormData) {
   const back = String(formData.get("back") || "/treasury");
   revalidatePath(back);
 }
+
+/** Member: "I paid" — creates a pending payment for what they owe; the treasurer confirms it. */
+export async function reportPayment(formData: FormData) {
+  const me = await requireMember();
+  if (!me.eventId) throw new Error("no event");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("report_payment", { p_event: me.eventId, p_amount: Number(formData.get("amount")), p_notes: String(formData.get("notes") || "") || null });
+  fail(error);
+  revalidatePath("/me"); revalidatePath("/treasury");
+}
+
+/** Treasurer: confirm or cancel a pending payment a member reported. */
+export async function setPaymentStatus(formData: FormData) {
+  const me = await requireMember();
+  if (me.role !== "admin") throw new Error("admin only");
+  const supabase = await createClient();
+  const status = String(formData.get("status")) === "confirmed" ? "confirmed" : "cancelled";
+  fail((await supabase.from("payments").update({ status, received_by_event_member_id: null }).eq("id", String(formData.get("id")))).error);
+  revalidatePath("/treasury"); revalidatePath("/me");
+}
+
+/** Admin: the event's payment link (PayBox group etc.). */
+export async function setPaymentLink(formData: FormData) {
+  const me = await requireMember();
+  if (me.role !== "admin" || !me.eventId) throw new Error("admin only");
+  const supabase = await createClient();
+  fail((await supabase.from("events").update({ payment_link: String(formData.get("payment_link") || "").trim() || null, payment_link_label: String(formData.get("payment_link_label") || "PayBox").trim() || "PayBox" }).eq("id", me.eventId)).error);
+  revalidatePath("/treasury"); revalidatePath("/me");
+}

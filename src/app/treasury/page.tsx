@@ -5,7 +5,7 @@ import { myDepartments, STATUS_HE, PAID_FROM_HE, METHOD_HE } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card, Kpi, Btn, inputCls } from "@/components/ui";
 import { money, money2, num } from "@/lib/format";
-import { setExpenseStatus, recordPayment, recordPayout, recordIncome } from "@/app/money-actions";
+import { setExpenseStatus, recordPayment, recordPayout, recordIncome, setPaymentStatus, setPaymentLink } from "@/app/money-actions";
 
 type Ledger = { event_member_id: string; first_name: string; last_name: string | null; tier: string; participation_share: number; due: number; paid: number; fronted: number; paid_out: number; surplus_share: number; balance: number };
 
@@ -16,11 +16,13 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
   if (!me.eventId) redirect("/me");
   const supabase = await createClient();
 
-  const [{ data: ledgerRows }, { data: pending }, { data: funds }, { data: payments }, { data: incomes }, depts] = await Promise.all([
+  const [{ data: ledgerRows }, { data: pending }, { data: funds }, { data: payments }, { data: pendingPayments }, { data: ev }, { data: incomes }, depts] = await Promise.all([
     supabase.rpc("ledger", { p_event: me.eventId }),
     supabase.from("v_expenses").select("*").eq("event_id", me.eventId).eq("status", "pending").order("created_at"),
     supabase.from("funds").select("id, key, name_he, from_members").eq("event_id", me.eventId),
-    supabase.from("payments").select("id, amount, method, paid_at, event_member_id, funds(name_he)").eq("event_id", me.eventId).order("paid_at", { ascending: false }).limit(15),
+    supabase.from("payments").select("id, amount, method, paid_at, event_member_id, funds(name_he)").eq("event_id", me.eventId).eq("status", "confirmed").order("paid_at", { ascending: false }).limit(15),
+    supabase.from("payments").select("id, amount, paid_at, event_member_id, notes").eq("event_id", me.eventId).eq("status", "pending").order("paid_at"),
+    supabase.from("events").select("payment_link, payment_link_label").eq("id", me.eventId).maybeSingle(),
     supabase.from("incomes").select("id, source_name, amount, received_at, funds(name_he)").eq("event_id", me.eventId).order("received_at", { ascending: false }).limit(15),
     myDepartments(me.eventId),
   ]);
@@ -43,6 +45,24 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
           <Kpi label="עוד לא שולם" value={money(totals.owe)} tone="bad" />
           <Kpi label="החזרים לביצוע" value={money(totals.refund)} tone="good" />
         </div>
+
+        {(pendingPayments ?? []).length > 0 && (
+          <Card title={`תשלומים שחברים דיווחו — לאישור (${num(pendingPayments!.length)})`} className="border-amber-300">
+            <table className="w-full text-sm"><tbody>
+              {pendingPayments!.map((p) => (
+                <tr key={p.id}>
+                  <td className="p-2 text-stone-500">{p.paid_at}</td><td className="p-2 font-medium">{nameOf.get(p.event_member_id) ?? "?"}</td>
+                  <td className="p-2 tabular-nums font-medium">{money2(p.amount)}</td><td className="p-2 text-xs text-stone-500">{p.notes}</td>
+                  <td className="p-2"><div className="flex gap-2">
+                    <form action={setPaymentStatus}><input type="hidden" name="id" value={p.id} /><input type="hidden" name="status" value="confirmed" /><Btn type="submit">התקבל</Btn></form>
+                    <form action={setPaymentStatus}><input type="hidden" name="id" value={p.id} /><input type="hidden" name="status" value="cancelled" /><Btn variant="danger" type="submit">לא התקבל</Btn></form>
+                  </div></td>
+                </tr>
+              ))}
+            </tbody></table>
+            <p className="mt-2 text-xs text-stone-500">בדוק בפייבוקס שהכסף באמת הגיע לפני ״התקבל״.</p>
+          </Card>
+        )}
 
         {(pending ?? []).length > 0 && (
           <Card title={`הוצאות ממתינות לאישור (${num(pending!.length)})`} className="border-amber-300">
@@ -138,6 +158,14 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
             </ul>
           </Card>
         </div>
+        <Card title="קישור לתשלום דמי קמפ">
+          <form action={setPaymentLink} className="flex flex-wrap items-center gap-2 text-sm">
+            <input name="payment_link" defaultValue={ev?.payment_link ?? ""} dir="ltr" placeholder="https://links.payboxapp.com/…" className={`${inputCls} w-80`} />
+            <input name="payment_link_label" defaultValue={ev?.payment_link_label ?? "PayBox"} placeholder="שם (PayBox / Bit)" className={`${inputCls} w-28`} />
+            <Btn variant="ghost" type="submit">שמור</Btn>
+          </form>
+          <p className="mt-2 text-xs text-stone-500">מופיע כפתור ״שלם״ ב״החשבון שלי״ לכל חבר שיש לו יתרה לתשלום. אחרי התשלום החבר לוחץ ״שילמתי״ ואתה מאשר כאן.</p>
+        </Card>
         <p className="text-xs text-stone-400">מצבי הוצאה: {Object.values(STATUS_HE).join(" · ")}</p>
       </main>
     </>
