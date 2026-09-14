@@ -11,3 +11,6 @@ node_modules/
 Claude outputs/
 tsconfig.tsbuildinfo
 src/app/favicon.ico
+
+# not in the repo: too large to push through the browser bridge; commit it from the Mac when convenient
+package-lock.json
