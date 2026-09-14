@@ -13,17 +13,19 @@ export function Nav({ me, depts = [] }: { me: CurrentMember; depts?: { slug: str
     tabs.push({ href: "/scenarios", label: "תרחישים" }, { href: "/treasury", label: "כספים" }, { href: "/dashboard", label: "לוח ניהול" }, { href: "/members", label: "חברים" });
   }
   return (
-    <header className="border-b border-stone-200 bg-stone-50">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-3 pt-5 pb-2">
-          <div className="flex items-baseline gap-3">
-            <a href="/me" className="font-serif text-2xl font-bold text-stone-900">ברנפלקס</a>
+    <header>
+      <div className="brandbar">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-2.5">
+          <a href="/me" className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element -- static brand mark, no optimisation needed */}
+            <img src="/mark.png" alt="" className="mark" />
+            <span className="name">ברנפלקס</span>
             <small className="text-sm text-stone-500">{me.eventName ?? "ניהול תקציב הקמפ"}</small>
-          </div>
+          </a>
           <span className="text-sm text-stone-500">{me.firstName ?? me.userEmail}</span>
         </div>
-        <NavTabs tabs={tabs} depts={depts.map((d) => ({ href: `/dept/${d.slug}`, label: d.name_he }))} />
       </div>
+      <NavTabs tabs={tabs} depts={depts.map((d) => ({ href: `/dept/${d.slug}`, label: d.name_he }))} />
     </header>
   );
 }
