@@ -71,7 +71,7 @@ export default async function MePage() {
             </div>
             {balance > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-orange-300 bg-orange-50 p-3 text-sm">
-                {ev?.payment_link && <a href={ev.payment_link} target="_blank" rel="noopener" className="rounded-lg bg-orange-600 px-3.5 py-1.5 font-bold text-white hover:bg-orange-700">שלם {money2(Math.max(0, balance - pendingSum))} ב‑{ev.payment_link_label ?? "PayBox"}</a>}
+                {ev?.payment_link && <a href={ev.payment_link} target="_blank" rel="noopener" className="btn-brand rounded-lg px-3.5 py-1.5">שלם {money2(Math.max(0, balance - pendingSum))} ב‑{ev.payment_link_label ?? "PayBox"}</a>}
                 {pendingSum > 0 ? (
                   <span className="text-stone-600">דיווחת על {money2(pendingSum)} — ממתין לאישור הגזבר.</span>
                 ) : (

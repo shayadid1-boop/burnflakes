@@ -24,10 +24,12 @@ export default function SetPasswordPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-sm p-6 pt-16 space-y-6">
-      <div className="space-y-1">
-        <div className="font-serif text-3xl font-bold">ברנפלקס</div>
-        <h1 className="text-lg font-normal text-stone-500">קביעת סיסמה</h1>
+    <main className="gate">
+      <div className="gate-card space-y-5">
+      <div className="space-y-1 text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element -- static brand logo */}
+        <img src="/logo.png" alt="ברנפלקס" className="gate-logo" />
+        <h1 className="text-base font-normal text-stone-500">קביעת סיסמה</h1>
         <p className="text-sm text-stone-500">מעכשיו נכנסים עם המייל והסיסמה. קישור למייל נשאר רק ל״שכחתי סיסמה״.</p>
       </div>
       <form onSubmit={submit} className="space-y-4">
@@ -39,12 +41,13 @@ export default function SetPasswordPage() {
           <span className="text-sm text-stone-600">עוד פעם, לוודא</span>
           <input type="password" required dir="ltr" autoComplete="new-password" minLength={6} value={p2} onChange={(e) => setP2(e.target.value)} className={inputCls} />
         </label>
-        <button type="submit" disabled={status === "busy"} className="w-full rounded-lg bg-orange-600 p-3 font-bold text-white hover:bg-orange-700 disabled:opacity-50">
+        <button type="submit" disabled={status === "busy"} className="btn-brand w-full rounded-lg p-3">
           {status === "busy" ? "רגע…" : "שמור סיסמה"}
         </button>
         {status === "error" && <p className="text-sm text-red-600">{message}</p>}
         <p className="text-center text-sm"><a href="/me" className="text-stone-500 underline">אחר כך</a></p>
       </form>
+      </div>
     </main>
   );
 }

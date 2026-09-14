@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "ברנפלקס — ניהול תקציב הקמפ",
   description: "תקציב, הוצאות, חברים ומשמרות של קמפ ברנפלקס",
 };
-export const viewport: Viewport = { themeColor: "#F4F2EC", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#F6F1E7", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
