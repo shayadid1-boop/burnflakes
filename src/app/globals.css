@@ -1,18 +1,22 @@
 @import "tailwindcss";
 
-/* ---- Burnflakes look (same language as the demo): warm paper, amber accent, serif headings ---- */
+/* ---- Burnflakes brand: sand paper, brown structure, turquoise action (colours taken from the logo) ---- */
 :root {
-  --bg: #F4F2EC; --surface: #FFFFFF; --surface2: #EDEAE2; --ink: #1E2229; --muted: #6B7078; --line: #DCD9D0;
-  --accent: #B8741A; --accent-ink: #7A4B0C; --accent-soft: #F6E7CF;
-  --plan: #4453A6; --plan-soft: #E3E6F6;
-  --good: #2E7D4F; --good-soft: #DDF0E4; --bad: #B4321E; --bad-soft: #F8DDD8; --warn: #9A6A00; --warn-soft: #FBEFC8;
-  --radius: 10px; --shadow: 0 1px 2px rgba(30,34,41,.06), 0 8px 24px -12px rgba(30,34,41,.18);
+  /* brand constants — same in both themes */
+  --brand-brown: #6A3736; --brand-dark: #2E1615; --brand-turq: #00F9CE; --brand-turq-edge: #00C9A6;
+  --brand-mag: #FF49E9; --on-turq: #2E1615; --on-brown: #F2E3DC;
+
+  --bg: #F6F1E7; --surface: #FFFFFF; --surface2: #EFE7D8; --ink: #3A1C1B; --muted: #8A7263; --line: #E2D6C2;
+  --accent: #00705C; --accent-ink: #00564A; --accent-soft: #D7FBF2;
+  --plan: #6A3736; --plan-soft: #F0E3DE;
+  --good: #2E7D5B; --good-soft: #DCF0E6; --bad: #B4432F; --bad-soft: #F8DFD9; --warn: #8A6A10; --warn-soft: #F7EBC9;
+  --radius: 10px; --shadow: 0 1px 2px rgba(58,28,27,.06), 0 8px 24px -12px rgba(58,28,27,.22);
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #151719; --surface: #1E2126; --surface2: #262A31; --ink: #E8E4DA; --muted: #9AA0A8; --line: #30343C;
-  --accent: #E2A345; --accent-ink: #F3C77C; --accent-soft: #3A2D14;
-  --plan: #8B96E0; --plan-soft: #262B47;
-  --good: #5FBF88; --good-soft: #173324; --bad: #F08A78; --bad-soft: #3D1A14; --warn: #E5B94A; --warn-soft: #3A2F0E;
+  --bg: #1A0E0D; --surface: #251413; --surface2: #33201E; --ink: #F2E7E2; --muted: #B49B92; --line: #432726;
+  --accent: #00F9CE; --accent-ink: #6BFFE3; --accent-soft: #0C3A33;
+  --plan: #D9A79F; --plan-soft: #3A2220;
+  --good: #5FBF88; --good-soft: #14301F; --bad: #F08A78; --bad-soft: #3D1A14; --warn: #E5B94A; --warn-soft: #3A2F0E;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
 }}
 
@@ -99,5 +103,33 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 .pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.plan { background: var(--plan-soft); color: var(--plan); } .pill.muted { background: var(--surface2); color: var(--muted); }
 .bar { height: 8px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--plan); border-radius: 999px; } .bar i.over { background: var(--bad); }
+
+/* ---- brand chrome ---- */
+/* primary action: the logo's own pairing — turquoise fill, dark brown letters */
+.btn-brand {
+  background: var(--brand-turq); color: var(--on-turq); border: 1px solid var(--brand-turq-edge);
+  border-bottom-width: 3px; font-weight: 700;
+}
+.btn-brand:hover:not(:disabled) { background: #21FFD8; }
+.btn-brand:disabled { opacity: .5; }
+
+.brandbar { background: var(--surface); border-bottom: 1px solid var(--line); }
+/* the logo art has a white ground, so the mark keeps a white badge in both themes */
+.brandbar .mark { width: 40px; height: auto; display: block; background: #FFF; border-radius: 8px; padding: 2px; }
+.brandbar .name { font-family: var(--font-serif); font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: .01em; }
+
+.navstrip { background: var(--brand-brown); }
+.navtab { color: #E9D9D0; border-bottom: 3px solid transparent; }
+.navtab:hover { color: #fff; }
+.navtab[aria-current="page"] { background: var(--brand-turq); color: var(--brand-dark); border-bottom-color: var(--brand-turq); }
+
+/* login / set-password: the one screen where the brand takes the whole stage */
+.gate { flex: 1 1 auto; background: var(--brand-dark); display: flex; align-items: flex-start; justify-content: center; padding: 48px 16px; }
+/* the card stays light in both themes — the logo art sits on white */
+.gate-card { background: #FFFFFF; color: #3A1C1B; border-radius: 14px; box-shadow: 0 24px 60px -30px rgba(0,0,0,.8); padding: 26px 22px; width: 100%; max-width: 380px; }
+.gate-card input { background: #FFFFFF; color: #3A1C1B; border-color: #E2D6C2; }
+.gate-card h1, .gate-card p, .gate-card span, .gate-card a, .gate-card button[type="button"] { color: #8A7263; }
+.gate-card .btn-brand { color: var(--on-turq); }
+.gate-logo { display: block; margin: 0 auto 6px; width: 190px; max-width: 70%; height: auto; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
