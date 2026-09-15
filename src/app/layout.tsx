@@ -3,8 +3,8 @@ import "./globals.css";
 import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
-  title: "ברנפלקס — ניהול תקציב הקמפ",
-  description: "תקציב, הוצאות, חברים ומשמרות של קמפ ברנפלקס",
+  title: "לול התרנגולות — ברנפלקס",
+  description: "לול התרנגולות — מערכת לניהול הקמפ: תקציב, הוצאות, חברים, משמרות ומחסן",
 };
 export const viewport: Viewport = { themeColor: "#F6F1E7", width: "device-width", initialScale: 1 };
 

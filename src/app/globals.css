@@ -128,8 +128,10 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 /* the card stays light in both themes — the logo art sits on white */
 .gate-card { background: #FFFFFF; color: #3A1C1B; border-radius: 14px; box-shadow: 0 24px 60px -30px rgba(0,0,0,.8); padding: 26px 22px; width: 100%; max-width: 380px; }
 .gate-card input { background: #FFFFFF; color: #3A1C1B; border-color: #E2D6C2; }
-.gate-card h1, .gate-card p, .gate-card span, .gate-card a, .gate-card button[type="button"] { color: #8A7263; }
+.gate-card p, .gate-card span, .gate-card a, .gate-card button[type="button"] { color: #8A7263; }
 .gate-card .btn-brand { color: var(--on-turq); }
+.gate-title { font-family: var(--font-serif); font-size: 20px; font-weight: 700; color: #3A1C1B; line-height: 1.25; }
+.gate-sub { font-size: 14px; color: #8A7263; }
 .gate-logo { display: block; margin: 0 auto 6px; width: 190px; max-width: 70%; height: auto; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

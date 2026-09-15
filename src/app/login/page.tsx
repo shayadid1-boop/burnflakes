@@ -42,7 +42,8 @@ export default function LoginPage() {
       <div className="space-y-1 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element -- static brand logo */}
         <img src="/logo.png" alt="ברנפלקס" className="gate-logo" />
-        <h1 className="text-base font-normal text-stone-500">כניסה לניהול תקציב הקמפ</h1>
+        <h1 className="gate-title">ברוכים הבאים ללול התרנגולות</h1>
+        <p className="gate-sub">מערכת לניהול הקמפ</p>
       </div>
 
       {status === "sent" ? (
