@@ -46,6 +46,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
         <div className="flex flex-wrap items-baseline gap-3">
           <h1 className="text-2xl font-bold">חברים</h1>
           <span className="text-sm text-stone-500">{num(attendingCount)} מגיעים ל‑{me.eventName} מתוך {num(members?.length ?? 0)} במאגר</span>
+          <a href="/members/notify" className="text-sm font-bold text-orange-700 hover:underline">✉ שליחה לחברים</a>
         </div>
 
         <form className="flex flex-wrap items-center gap-2 text-sm" method="get">
