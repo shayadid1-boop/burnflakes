@@ -5,7 +5,7 @@ import { myDepartments } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card, Btn, inputCls } from "@/components/ui";
 import { ShiftGrid, type GridShift } from "@/components/shift-grid";
-import { OpenShifts } from "@/components/open-shifts";
+import { SignupGrid } from "@/components/signup-grid";
 import { createShiftType, updateShiftType, deleteShiftType, setShiftSettings } from "@/app/shift-actions";
 import { num } from "@/lib/format";
 
@@ -74,7 +74,10 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
         </div>
 
         {view === "open" && (
-          <OpenShifts eventId={me.eventId} myEmId={em?.id ?? null} canTake={!!em?.attending} day={dayParam} deptSlug={deptParam} back={back} />
+          <Card>
+            <h2 className="mb-2">כל המשמרות הפתוחות</h2>
+            <SignupGrid eventId={me.eventId} myEmId={em?.id ?? null} canTake={!!em?.attending} days={days} buildDays={buildDays} back={back} />
+          </Card>
         )}
 
         {view === "board" && (<>
