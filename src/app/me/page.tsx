@@ -34,7 +34,7 @@ export default async function MePage() {
     me.eventId ? supabase.from("v_expenses").select("*").eq("event_id", me.eventId).order("created_at", { ascending: false }).limit(50) : Promise.resolve({ data: [] }),
     supabase.from("departments").select("id, name_he").eq("is_active", true).eq("kind", "internal").order("sort_order"),
     me.eventId
-      ? supabase.from("shift_assignments").select("shift_id, event_member_id, shifts!inner(event_id, day, title_he, starts_at, ends_at, departments(name_he), shift_roles(name_he))").eq("shifts.event_id", me.eventId).order("shift_id")
+      ? supabase.from("shift_assignments").select("shift_id, event_member_id, shifts!inner(event_id, day, title_he, departments(name_he), shift_roles(name_he))").eq("shifts.event_id", me.eventId).order("shift_id")
       : Promise.resolve({ data: [] }),
     me.eventId ? supabase.from("events").select("payment_link, payment_link_label").eq("id", me.eventId).maybeSingle() : Promise.resolve({ data: null }),
     me.eventId ? supabase.from("payments").select("id, amount, paid_at").eq("event_id", me.eventId).eq("status", "pending").order("paid_at", { ascending: false }) : Promise.resolve({ data: [] }),
@@ -44,8 +44,8 @@ export default async function MePage() {
   const mine = (myExpenses ?? []).filter((x) => x.paid_by_event_member_id === em?.id || x.created_by === em?.id);
   const balance = Number(ledger?.balance ?? 0);
   const shifts = (myShifts ?? []).filter((a) => a.shifts && em && a.event_member_id === em.id).map((a) => {
-    const s = a.shifts as unknown as { day: string; title_he: string | null; starts_at: string | null; ends_at: string | null; departments: { name_he: string } | null; shift_roles: { name_he: string } | null };
-    return { id: a.shift_id, day: s.day, name: s.title_he ?? s.shift_roles?.name_he ?? "משמרת", dept: s.departments?.name_he ?? "", time: s.starts_at ? `${s.starts_at.slice(0, 5)}–${s.ends_at?.slice(0, 5) ?? ""}` : "" };
+    const s = a.shifts as unknown as { day: string; title_he: string | null; departments: { name_he: string } | null; shift_roles: { name_he: string } | null };
+    return { id: a.shift_id, day: s.day, name: s.title_he ?? s.shift_roles?.name_he ?? "משמרת", dept: s.departments?.name_he ?? "" };
   }).sort((a, b) => a.day.localeCompare(b.day));
 
   return (
@@ -95,7 +95,7 @@ export default async function MePage() {
           <Card title="המשמרות שלי">
             {shifts.length === 0 ? <p className="text-sm text-stone-500">עדיין לא נרשמת למשמרות. <a href="/shifts" className="text-orange-700 underline">למסך המשמרות</a></p> : (
               <ul className="space-y-1 text-sm">
-                {shifts.map((s) => <li key={s.id} className="flex justify-between border-b border-stone-100 py-1"><span>{s.day} · {s.name}</span><span className="text-stone-500">{s.dept} {s.time}</span></li>)}
+                {shifts.map((s) => <li key={s.id} className="flex justify-between border-b border-stone-100 py-1"><span>{s.day} · {s.name}</span><span className="text-stone-500">{s.dept}</span></li>)}
               </ul>
             )}
           </Card>
