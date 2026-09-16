@@ -22,7 +22,7 @@ export default async function MePage() {
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 text-sm">
             נכנסת עם <b dir="ltr">{me.userEmail}</b>, אבל המייל הזה לא רשום במאגר החברים. בקש מהמנהל להוסיף אותך.
           </div>
-          <form action="/auth/signout" method="post"><button className="text-sm text-stone-500 underline">יציאה</button></form>
+          <form action="/auth/signout" method="post"><button className="btn-signout">יציאה מהמערכת</button></form>
         </main>
       </>
     );
@@ -120,7 +120,7 @@ export default async function MePage() {
 
         <div className="flex gap-4 text-sm text-stone-500">
           <a href="/set-password" className="underline">שינוי סיסמה</a>
-          <form action="/auth/signout" method="post"><button className="underline">יציאה</button></form>
+          <form action="/auth/signout" method="post"><button className="btn-signout">יציאה מהמערכת</button></form>
         </div>
       </main>
     </>

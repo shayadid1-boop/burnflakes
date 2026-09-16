@@ -34,6 +34,9 @@ export default async function ScenariosPage() {
 
         {(events ?? []).map((ev) => {
           const list = (scenarios ?? []).filter((s) => s.event_id === ev.id).sort((a, b) => a.created_at.localeCompare(b.created_at));
+          // a closed year whose scenarios are all in the archive (2022) is history, not something to plan with —
+          // the data stays in the database, it just does not clutter the planning screen
+          if (ev.id !== me.eventId && list.every((s) => s.status === "archived")) return null;
           return (
             <Card key={ev.id} title={`${ev.name} · ${ev.year}`}>
               {list.length === 0 && <p className="text-sm text-stone-500">אין עדיין תרחישים לשנה הזו.</p>}

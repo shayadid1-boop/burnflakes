@@ -22,7 +22,14 @@ export function Nav({ me, depts = [] }: { me: CurrentMember; depts?: { slug: str
             <span className="name">ברנפלקס</span>
             <small className="text-sm text-stone-500">{me.eventName ?? "ניהול תקציב הקמפ"}</small>
           </a>
-          <span className="text-sm text-stone-500">{me.firstName ?? me.userEmail}</span>
+          {/* the way out was a small underlined word at the bottom of /me — now it is a button under the
+              name, in the header, so it is in the same place on every page */}
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-sm text-stone-500">{me.firstName ?? me.userEmail}</span>
+            <form action="/auth/signout" method="post">
+              <button className="btn-signout" title="יציאה מהמערכת">יציאה</button>
+            </form>
+          </div>
         </div>
       </div>
       <NavTabs tabs={tabs} depts={depts.map((d) => ({ href: `/dept/${d.slug}`, label: d.name_he }))} />

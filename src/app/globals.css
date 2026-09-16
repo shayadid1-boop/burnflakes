@@ -113,6 +113,13 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 .btn-brand:hover:not(:disabled) { background: #21FFD8; }
 .btn-brand:disabled { opacity: .5; }
 
+/* leaving the system is an ordinary action, so it is a plain outlined button — visible, not shouting */
+.btn-signout {
+  border: 1px solid var(--line); background: var(--surface2); color: var(--ink);
+  border-radius: 8px; padding: 4px 12px; font-size: 13px; font-weight: 700; line-height: 1.6;
+}
+.btn-signout:hover { background: var(--brand-brown); color: var(--on-brown); border-color: var(--brand-brown); }
+
 .brandbar { background: var(--surface); border-bottom: 1px solid var(--line); }
 /* the logo art has a white ground, so the mark keeps a white badge in both themes */
 .brandbar .mark { width: 40px; height: auto; display: block; background: #FFF; border-radius: 8px; padding: 2px; }
