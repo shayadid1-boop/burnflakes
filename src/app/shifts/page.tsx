@@ -5,14 +5,15 @@ import { myDepartments } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card, Btn, inputCls } from "@/components/ui";
 import { ShiftGrid, type GridShift } from "@/components/shift-grid";
+import { OpenShifts } from "@/components/open-shifts";
 import { createShiftType, updateShiftType, deleteShiftType, setShiftSettings } from "@/app/shift-actions";
 import { num } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 /** The shift board: one grid per department — shift types down the side, event days across the top, names in the cells. */
-export default async function ShiftsPage({ searchParams }: { searchParams: Promise<{ dept?: string }> }) {
-  const { dept: deptParam } = await searchParams;
+export default async function ShiftsPage({ searchParams }: { searchParams: Promise<{ dept?: string; view?: string; day?: string }> }) {
+  const { dept: deptParam, view: viewParam, day: dayParam } = await searchParams;
   const me = await requireMember();
   const supabase = await createClient();
   if (!me.eventId || !me.memberId) return (<><Nav me={me} /><main className="p-6 text-sm text-stone-500">אין אירוע פעיל.</main></>);
@@ -29,7 +30,11 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
   const dept = depts.find((d) => d.slug === deptParam) ?? depts[0];
   if (!dept) return (<><Nav me={me} /><main className="p-6 text-sm text-stone-500">אין מחלקות פעילות.</main></>);
   const canEdit = me.role === "admin" || myDepts.some((d) => d.id === dept.id);
-  const back = `/shifts?dept=${dept.slug}`;
+  // two views: the sign-up list (everything open, all departments) and the board of one department
+  const view = viewParam === "board" || viewParam === "open" ? viewParam : (myDepts.length > 0 ? "board" : "open");
+  const back = view === "open"
+    ? `/shifts?view=open${dayParam ? `&day=${dayParam}` : ""}${deptParam ? `&dept=${deptParam}` : ""}`
+    : `/shifts?view=board&dept=${dept.slug}`;
 
   const days: string[] = [];
   if (ev?.starts_on && ev?.ends_on) {
@@ -59,13 +64,23 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
       <Nav me={me} depts={myDepts} />
       <main className="mx-auto w-full max-w-6xl space-y-5 p-4">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h1>לוח משמרות · {me.eventName}</h1>
-          <Link href={`/shifts/print?dept=${dept.slug}`} className="text-sm font-bold text-orange-700 hover:underline">הדפסה / PDF ↗</Link>
+          <h1>משמרות · {me.eventName}</h1>
+          {view === "board" && <Link href={`/shifts/print?dept=${dept.slug}`} className="text-sm font-bold text-orange-700 hover:underline">הדפסה / PDF ↗</Link>}
         </div>
 
+        <div className="flex gap-1.5">
+          <Link href="/shifts?view=open" className={`rounded-full border px-4 py-1 text-sm font-bold ${view === "open" ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-600 hover:bg-stone-100"}`}>הרשמה למשמרות</Link>
+          <Link href={`/shifts?view=board&dept=${dept.slug}`} className={`rounded-full border px-4 py-1 text-sm font-bold ${view === "board" ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-600 hover:bg-stone-100"}`}>הלוח לפי מחלקה</Link>
+        </div>
+
+        {view === "open" && (
+          <OpenShifts eventId={me.eventId} myEmId={em?.id ?? null} canTake={!!em?.attending} day={dayParam} deptSlug={deptParam} back={back} />
+        )}
+
+        {view === "board" && (<>
         <div className="flex flex-wrap gap-1.5">
           {depts.map((d) => (
-            <Link key={d.slug} href={`/shifts?dept=${d.slug}`}
+            <Link key={d.slug} href={`/shifts?view=board&dept=${d.slug}`}
               className={`rounded-full border px-3.5 py-1 text-sm font-bold ${d.slug === dept.slug ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-600 hover:bg-stone-100"}`}>
               {d.name_he}
             </Link>
@@ -84,7 +99,9 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
           </p>
         </Card>
 
-        {canEdit && (
+        </>)}
+
+        {view === "board" && canEdit && (
           <Card title="סוגי המשמרת של המחלקה">
             <p className="mb-3 text-sm text-stone-500">שם וכמה אנשים — זה הכול. בלי שעות: כולם יודעים מתי ארוחת בוקר.</p>
             <ul className="mb-3 space-y-1.5">
@@ -113,7 +130,7 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
           </Card>
         )}
 
-        {me.role === "admin" && (
+        {view === "board" && me.role === "admin" && (
           <Card title="חלוקה הוגנת — לתכנון שלך בלבד">
             <p className="mb-3 text-sm text-stone-500">החברים לא רואים מונים; זה המספר שעוזר לך לפזר את המשמרות.</p>
             <form action={setShiftSettings} className="flex flex-wrap items-center gap-3 text-sm">
