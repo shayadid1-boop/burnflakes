@@ -142,3 +142,8 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 .gate-logo { display: block; margin: 0 auto 6px; width: 190px; max-width: 70%; height: auto; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Clear Vision logo in the footer: its wordmark is dark, so on the dark theme it sits on a white badge */
+.cv-logo { display: block; height: 29px; width: auto; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cv-logo { background: #FFFFFF; border-radius: 6px; padding: 2px 6px; } }
+:root[data-theme="dark"] .cv-logo { background: #FFFFFF; border-radius: 6px; padding: 2px 6px; }
