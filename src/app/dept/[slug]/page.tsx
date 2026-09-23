@@ -5,6 +5,7 @@ import { myDepartments, STATUS_HE, STATUS_TONE, PAID_FROM_HE } from "@/lib/data"
 import { Nav } from "@/components/nav";
 import { Card, Kpi, Btn, Pill, inputCls } from "@/components/ui";
 import { ExpenseForm } from "@/components/expense-form";
+import { ShoppingList, type ShoppingItem } from "@/components/shopping-list";
 import { money, num } from "@/lib/format";
 import { setExpenseStatus, deleteExpense, recordIncome } from "@/app/money-actions";
 
@@ -18,7 +19,7 @@ export default async function DeptPage({ params }: { params: Promise<{ slug: str
   if (!dept) notFound();          // not my department (or not a lead) — 404 on purpose
   const back = `/dept/${slug}`;
 
-  const [{ data: lines }, { data: expenses }, { data: people }, { data: incomes }, { data: net }] = await Promise.all([
+  const [{ data: lines }, { data: expenses }, { data: people }, { data: incomes }, { data: net }, { data: shopItems }, { data: shopPlan }] = await Promise.all([
     supabase.from("budget_lines").select("id, name_he, planned_amount, department_id").eq("event_id", me.eventId).eq("department_id", dept.id).order("name_he"),
     supabase.from("v_expenses").select("*").eq("event_id", me.eventId).eq("department_id", dept.id).order("expense_date", { ascending: false }).order("created_at", { ascending: false }),
     supabase.from("event_members").select("id, members(first_name, last_name)").eq("event_id", me.eventId).eq("attending", true),
@@ -28,6 +29,8 @@ export default async function DeptPage({ params }: { params: Promise<{ slug: str
     dept.kind === "fundraiser"
       ? supabase.from("v_fundraiser_net").select("*").eq("event_id", me.eventId).eq("department_id", dept.id).maybeSingle()
       : Promise.resolve({ data: null }),
+    supabase.from("shopping_items").select("id, name_he, unit_he, per_shift, in_stock, unit_price, budget_line, notes_he").eq("event_id", me.eventId).eq("department_id", dept.id).order("sort_order").order("name_he"),
+    supabase.from("shopping_plans").select("shift_count").eq("event_id", me.eventId).eq("department_id", dept.id).maybeSingle(),
   ]);
 
   const active = (expenses ?? []).filter((x) => x.status !== "rejected");
@@ -104,6 +107,11 @@ export default async function DeptPage({ params }: { params: Promise<{ slug: str
             <ExpenseForm departments={[dept]} fixedDepartment={dept} lines={lines ?? []} people={persons} lead back={back} />
           </Card>
         </div>
+
+        {(shopItems ?? []).length > 0 && (
+          <ShoppingList deptId={dept.id} back={back} items={(shopItems ?? []) as ShoppingItem[]} shifts={shopPlan?.shift_count ?? 3}
+            lines={(lines ?? []).map((l) => ({ name_he: l.name_he, planned_amount: Number(l.planned_amount) }))} />
+        )}
 
         <Card title={`הוצאות (${num(active.length)})`}>
           <div className="overflow-x-auto">
