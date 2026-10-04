@@ -6,7 +6,7 @@ import { Nav } from "@/components/nav";
 import { Card, Btn, inputCls } from "@/components/ui";
 import { ShiftGrid, type GridShift } from "@/components/shift-grid";
 import { SignupGrid } from "@/components/signup-grid";
-import { createShiftType, updateShiftType, deleteShiftType, setShiftSettings } from "@/app/shift-actions";
+import { createShiftType, updateShiftType, deleteShiftType, setShiftSettings, setShiftsOpen } from "@/app/shift-actions";
 import { num } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
   const [{ data: allDepts }, myDepts, { data: ev }, { data: em }, { data: counts }] = await Promise.all([
     supabase.from("departments").select("id, slug, name_he, sort_order").eq("is_active", true).eq("kind", "internal").order("sort_order"),
     myDepartments(me.eventId),
-    supabase.from("events").select("starts_on, ends_on, event_starts_on, volunteer_shift_credit, volunteers_count_in_total").eq("id", me.eventId).single(),
+    supabase.from("events").select("starts_on, ends_on, event_starts_on, volunteer_shift_credit, volunteers_count_in_total, shifts_open").eq("id", me.eventId).single(),
     supabase.from("event_members").select("id, attending").eq("event_id", me.eventId).eq("member_id", me.memberId).maybeSingle(),
     supabase.from("v_member_shift_count").select("event_member_id, first_name, last_name, remaining").eq("event_id", me.eventId),
   ]);
@@ -56,6 +56,8 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
   }));
 
   const people = (counts ?? []).map((c) => ({ id: c.event_member_id, name: `${c.first_name} ${c.last_name ?? ""}`.trim(), remaining: Number(c.remaining ?? 0) }));
+  const signupOpen = ev?.shifts_open === true;
+  const canTake = !!em?.attending && signupOpen;
   const totalSlots = shifts.reduce((t, s) => t + s.slots, 0);
   const totalFilled = shifts.reduce((t, s) => t + s.people.length, 0);
 
@@ -68,6 +70,18 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
           {view === "board" && <Link href={`/shifts/print?dept=${dept.slug}`} className="text-sm font-bold text-orange-700 hover:underline">הדפסה / PDF ↗</Link>}
         </div>
 
+        {me.role === "admin" ? (
+          <div className={`flex flex-wrap items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm ${signupOpen ? "bg-green-50" : "bg-amber-50"}`}>
+            <span><b>ההרשמה למשמרות {signupOpen ? "פתוחה" : "סגורה"}.</b> {signupOpen ? "החברים יכולים לקחת ולבטל משמרות." : "החברים רואים את הלוח אבל לא יכולים להירשם. פותחים אחרי שמודיעים לקמפ."}</span>
+            <form action={setShiftsOpen}>
+              <input type="hidden" name="open" value={signupOpen ? "0" : "1"} />
+              <Btn type="submit" variant={signupOpen ? "ghost" : "primary"}>{signupOpen ? "סגור הרשמה" : "פתח הרשמה"}</Btn>
+            </form>
+          </div>
+        ) : !signupOpen && (
+          <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm"><b>ההרשמה למשמרות עוד לא נפתחה.</b> נודיע לכולם כשאפשר להירשם.</div>
+        )}
+
         <div className="flex gap-1.5">
           <Link href="/shifts?view=open" className={`rounded-full border px-4 py-1 text-sm font-bold ${view === "open" ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-600 hover:bg-stone-100"}`}>הרשמה למשמרות</Link>
           <Link href={`/shifts?view=board&dept=${dept.slug}`} className={`rounded-full border px-4 py-1 text-sm font-bold ${view === "board" ? "border-stone-900 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-600 hover:bg-stone-100"}`}>הלוח לפי מחלקה</Link>
@@ -76,7 +90,7 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
         {view === "open" && (
           <Card>
             <h2 className="mb-2">כל המשמרות הפתוחות</h2>
-            <SignupGrid eventId={me.eventId} myEmId={em?.id ?? null} canTake={!!em?.attending} days={days} buildDays={buildDays} back={back} />
+            <SignupGrid eventId={me.eventId} myEmId={em?.id ?? null} canTake={canTake} days={days} buildDays={buildDays} back={back} />
           </Card>
         )}
 
@@ -96,7 +110,7 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
             <span className="text-sm text-stone-500">{num(totalFilled)} מתוך {num(totalSlots)} מקומות מאוישים</span>
           </div>
           <ShiftGrid dept={dept} days={days} buildDays={buildDays} types={types ?? []} shifts={shifts}
-            people={people} myEmId={em?.id ?? null} canEdit={canEdit} canTake={!!em?.attending} back={back} />
+            people={people} myEmId={em?.id ?? null} canEdit={canEdit} canTake={canTake} back={back} />
           <p className="mt-2 text-xs text-stone-500">
             {canEdit ? "תא ריק = אין משמרת כזו ביום הזה; ״+״ פותח אותה. ״סגור״ מבטל את המשמרת ביום הזה." : "מקום פנוי — לחץ ״אני לוקח״. אפשר לבטל עד תחילת האירוע."}
           </p>

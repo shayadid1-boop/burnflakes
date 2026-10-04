@@ -10,6 +10,8 @@ async function myEventMemberId() {
   const supabase = await createClient();
   const { data } = await supabase.from("event_members").select("id, attending").eq("event_id", me.eventId!).eq("member_id", me.memberId!).maybeSingle();
   if (!data?.attending) throw new Error("only attending members");
+  const { data: ev } = await supabase.from("events").select("shifts_open").eq("id", me.eventId!).single();
+  if (!ev?.shifts_open) throw new Error("ההרשמה למשמרות עדיין סגורה");
   return { supabase, emId: data.id };
 }
 
@@ -107,6 +109,14 @@ export async function assignShift(formData: FormData) {
   if (formData.get("remove") === "1") fail((await supabase.from("shift_assignments").delete().eq("shift_id", shiftId).eq("event_member_id", emId)).error);
   else fail((await supabase.from("shift_assignments").upsert({ shift_id: shiftId, event_member_id: emId })).error);
   revalidatePath(String(formData.get("back") || "/shifts")); revalidatePath("/me");
+}
+
+/** Admin: open or close member sign-up for the whole board. */
+export async function setShiftsOpen(formData: FormData) {
+  const { me, supabase } = await lead();
+  if (me.role !== "admin") throw new Error("admin only");
+  fail((await supabase.from("events").update({ shifts_open: formData.get("open") === "1" }).eq("id", me.eventId)).error);
+  revalidatePath("/shifts"); revalidatePath("/me");
 }
 
 /** Admin: fair-share settings for the event (planning figure only — members do not see a counter). */

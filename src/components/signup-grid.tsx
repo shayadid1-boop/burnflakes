@@ -89,12 +89,12 @@ export async function SignupGrid({ eventId, myEmId, canTake, days, buildDays, ba
                           {people.map((p) => <span key={p.emId} className={`block ${p.emId === myEmId ? "font-bold" : ""}`}>{p.name}</span>)}
                         </span>
                       )}
-                      {mine ? (
+                      {mine && canTake ? (
                         <form action={unregisterShift}>
                           <input type="hidden" name="shift_id" value={s.id} /><input type="hidden" name="back" value={back} />
                           <button className="w-full rounded-md border border-stone-300 bg-white py-0.5 text-[11px] font-bold">בטל</button>
                         </form>
-                      ) : full ? (
+                      ) : mine ? null : full ? (
                         <span className="text-[11px] text-stone-400">מלא</span>
                       ) : canTake ? (
                         <form action={registerShift}>
@@ -113,7 +113,7 @@ export async function SignupGrid({ eventId, myEmId, canTake, days, buildDays, ba
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-stone-500">תא ריק = אין משמרת כזו ביום הזה. לחיצה על ״אני לוקח״ רושמת אותך; אפשר לבטל עד תחילת האירוע.</p>
+      <p className="mt-2 text-xs text-stone-500">תא ריק = אין משמרת כזו ביום הזה. {canTake ? "לחיצה על ״אני לוקח״ רושמת אותך; אפשר לבטל עד תחילת האירוע." : "ההרשמה תיפתח אחרי שנודיע לקמפ."}</p>
     </div>
   );
 }
