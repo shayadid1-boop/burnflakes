@@ -41,9 +41,11 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
       ? supabase.from("shift_assignments").select("shift_id, event_member_id, shifts!inner(event_id, day, title_he, departments(name_he), shift_roles(name_he))").eq("shifts.event_id", me.eventId).order("shift_id")
       : Promise.resolve({ data: [] }),
     me.eventId ? supabase.from("events").select("payment_link, payment_link_label, settled").eq("id", me.eventId).maybeSingle() : Promise.resolve({ data: null }),
-    me.eventId ? supabase.from("payments").select("id, amount, paid_at").eq("event_id", me.eventId).eq("status", "pending").order("paid_at", { ascending: false }) : Promise.resolve({ data: [] }),
+    me.eventId ? supabase.from("payments").select("id, amount, paid_at, event_member_id").eq("event_id", me.eventId).eq("status", "pending").order("paid_at", { ascending: false }) : Promise.resolve({ data: [] }),
   ]);
-  const pendingSum = (myPending ?? []).reduce((t, p) => t + Number(p.amount), 0);
+  // only MY reports — an admin can read everyone's payments, and summing those showed admins
+  // "you reported 4,500 ₪" when it was three different members' reports
+  const pendingSum = (myPending ?? []).filter((p) => p.event_member_id === em?.id).reduce((t, p) => t + Number(p.amount), 0);
   const ledger = (ledgerRows ?? []).find((r: { event_member_id: string }) => r.event_member_id === em?.id);
   const mine = (myExpenses ?? []).filter((x) => x.paid_by_event_member_id === em?.id || x.created_by === em?.id);
   const balance = Number(ledger?.balance ?? 0);
@@ -103,7 +105,8 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
             )}
             {toPay > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-orange-300 bg-orange-50 p-3 text-sm">
-                {ev?.payment_link && Math.max(0, toPay - pendingSum) > 0 && <a href={ev.payment_link} target="_blank" rel="noopener" className="btn-brand rounded-lg px-3.5 py-1.5">שלם {money2(toPay - pendingSum)} ב‑{ev.payment_link_label ?? "PayBox"}</a>}
+                {/* the payment link stays visible while anything is still owed — a report waiting for the treasurer is not money received yet */}
+                {ev?.payment_link && <a href={ev.payment_link} target="_blank" rel="noopener" className="btn-brand rounded-lg px-3.5 py-1.5">לתשלום {money2(toPay)} ב‑{ev.payment_link_label ?? "PayBox"}</a>}
                 {pendingSum > 0 ? (
                   <span className="text-stone-600">דיווחת על {money2(pendingSum)} — ממתין לאישור הגזבר.</span>
                 ) : (
