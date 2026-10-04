@@ -142,3 +142,15 @@ export async function setPaymentLink(formData: FormData) {
   fail((await supabase.from("events").update({ payment_link: String(formData.get("payment_link") || "").trim() || null, payment_link_label: String(formData.get("payment_link_label") || "PayBox").trim() || "PayBox" }).eq("id", me.eventId)).error);
   revalidatePath("/treasury"); revalidatePath("/me");
 }
+
+/** Admin: "חישוב החזרים" — switches the event from collecting dues to settling up. Until then members see
+ *  only their dues; after it, out-of-pocket expenses and the surplus share are worked into each balance.
+ *  Can be undone (e.g. an expense turned up late). */
+export async function setSettled(formData: FormData) {
+  const me = await requireMember();
+  if (me.role !== "admin" || !me.eventId) throw new Error("admin only");
+  const supabase = await createClient();
+  fail((await supabase.from("events").update({ settled: formData.get("settled") === "1" }).eq("id", me.eventId)).error);
+  revalidatePath("/treasury"); revalidatePath("/me"); revalidatePath("/dashboard");
+  redirect("/treasury");
+}

@@ -13,20 +13,22 @@ export default async function DashboardPage() {
   const me = await requireMember();
   if (me.role !== "admin" || !me.eventId) redirect("/me");
   const supabase = await createClient();
-  const [depts, { data: dash }, { data: balance }, { data: byDept }, { data: pending }, { data: ledgerRows }] = await Promise.all([
+  const [depts, { data: dash }, { data: balance }, { data: byDept }, { data: pending }, { data: ledgerRows }, { data: evRow }] = await Promise.all([
     myDepartments(me.eventId),
     supabase.from("v_management_dashboard").select("*").eq("event_id", me.eventId).maybeSingle(),
     supabase.from("v_event_balance").select("*").eq("event_id", me.eventId),
     supabase.from("v_department_budget_vs_actual").select("*").eq("event_id", me.eventId),
     supabase.from("v_expenses").select("id, description, amount, department, paid_by").eq("event_id", me.eventId).eq("status", "pending"),
     supabase.rpc("ledger", { p_event: me.eventId }),
+    supabase.from("events").select("settled").eq("id", me.eventId).maybeSingle(),
   ]);
   const income = (balance ?? []).filter((b) => b.side === "income");
   const expense = (balance ?? []).filter((b) => b.side === "expense").filter((b) => Number(b.planned) > 0 || Number(b.actual) > 0);
   const sum = (rows: { planned: number; actual: number }[], k: "planned" | "actual") => rows.reduce((s, r) => s + Number(r[k]), 0);
   const overDepts = (byDept ?? []).filter((d) => Number(d.actual) > Number(d.planned) && Number(d.planned) > 0);
   const notPaid = ((ledgerRows ?? []) as Ledger[]).filter((r) => Number(r.due) > 0 && Number(r.paid) < Number(r.due));
-  const refunds = ((ledgerRows ?? []) as Ledger[]).filter((r) => Number(r.balance) < 0);
+  // refunds exist only after the treasurer pressed "חישוב החזרים"
+  const refunds = evRow?.settled ? ((ledgerRows ?? []) as Ledger[]).filter((r) => Number(r.balance) < 0) : [];
 
   return (
     <>

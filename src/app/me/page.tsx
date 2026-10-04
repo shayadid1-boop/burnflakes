@@ -36,13 +36,18 @@ export default async function MePage() {
     me.eventId
       ? supabase.from("shift_assignments").select("shift_id, event_member_id, shifts!inner(event_id, day, title_he, departments(name_he), shift_roles(name_he))").eq("shifts.event_id", me.eventId).order("shift_id")
       : Promise.resolve({ data: [] }),
-    me.eventId ? supabase.from("events").select("payment_link, payment_link_label").eq("id", me.eventId).maybeSingle() : Promise.resolve({ data: null }),
+    me.eventId ? supabase.from("events").select("payment_link, payment_link_label, settled").eq("id", me.eventId).maybeSingle() : Promise.resolve({ data: null }),
     me.eventId ? supabase.from("payments").select("id, amount, paid_at").eq("event_id", me.eventId).eq("status", "pending").order("paid_at", { ascending: false }) : Promise.resolve({ data: [] }),
   ]);
   const pendingSum = (myPending ?? []).reduce((t, p) => t + Number(p.amount), 0);
   const ledger = (ledgerRows ?? []).find((r: { event_member_id: string }) => r.event_member_id === em?.id);
   const mine = (myExpenses ?? []).filter((x) => x.paid_by_event_member_id === em?.id || x.created_by === em?.id);
   const balance = Number(ledger?.balance ?? 0);
+  // two stages: until the treasurer settles the event, a member just owes the dues; refunds come after
+  const settled = ev?.settled === true;
+  const due = Number(ledger?.due ?? 0), paid = Number(ledger?.paid ?? 0), fronted = Number(ledger?.fronted ?? 0);
+  const duesLeft = Math.max(0, due - paid);
+  const toPay = settled ? Math.max(0, balance) : duesLeft;
   const shifts = (myShifts ?? []).filter((a) => a.shifts && em && a.event_member_id === em.id).map((a) => {
     const s = a.shifts as unknown as { day: string; title_he: string | null; departments: { name_he: string } | null; shift_roles: { name_he: string } | null };
     return { id: a.shift_id, day: s.day, name: s.title_he ?? s.shift_roles?.name_he ?? "משמרת", dept: s.departments?.name_he ?? "" };
@@ -59,32 +64,54 @@ export default async function MePage() {
 
         {em && (
           <Card title="החשבון שלי">
-            <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
-              <div><div className="text-xs text-stone-500">דמי קמפ</div><div className="font-semibold">{money2(ledger?.due)}</div></div>
-              <div><div className="text-xs text-stone-500">שילמתי</div><div className="font-semibold">{money2(ledger?.paid)}</div></div>
-              <div><div className="text-xs text-stone-500">הוצאתי מהכיס</div><div className="font-semibold">{money2(ledger?.fronted)}</div></div>
-              <div><div className="text-xs text-stone-500">חלקי בעודף</div><div className="font-semibold">{money2(ledger?.surplus_share)}</div></div>
-              <div className={`rounded-lg p-2 ${balance > 0 ? "bg-red-50" : balance < 0 ? "bg-green-50" : "bg-stone-50"}`}>
-                <div className="text-xs text-stone-500">{balance > 0 ? "נשאר לשלם" : balance < 0 ? "מגיע לי החזר" : "מאוזן"}</div>
-                <div className={`font-bold ${balance > 0 ? "text-red-700" : balance < 0 ? "text-green-700" : ""}`}>{money2(Math.abs(balance))}</div>
-              </div>
-            </div>
-            {balance > 0 && (
+            {!settled ? (
+              <>
+                {/* before the event is settled: the dues are the dues — nothing is subtracted from them */}
+                <div className="grid grid-cols-3 gap-3 text-sm">
+                  <div><div className="text-xs text-stone-500">דמי קמפ</div><div className="font-semibold">{money2(due)}</div></div>
+                  <div><div className="text-xs text-stone-500">שילמתי</div><div className="font-semibold">{money2(paid)}</div></div>
+                  <div className={`rounded-lg p-2 ${duesLeft > 0 ? "bg-red-50" : "bg-green-50"}`}>
+                    <div className="text-xs text-stone-500">{duesLeft > 0 ? "נשאר לשלם" : "דמי הקמפ"}</div>
+                    <div className={`font-bold ${duesLeft > 0 ? "text-red-700" : "text-green-700"}`}>{duesLeft > 0 ? money2(duesLeft) : "שולמו במלואם ✓"}</div>
+                  </div>
+                </div>
+                {fronted > 0 && (
+                  <p className="mt-3 rounded-lg bg-stone-100 p-2 text-sm">
+                    הוצאת מהכיס עבור הקמפ <b>{money2(fronted)}</b>. הסכום הזה לא מקוזז מדמי הקמפ — הוא יוחזר לך אחרי האירוע, כשכל החשבונות ייסגרו.
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                {/* after the treasurer settled the event: the full account, refunds included */}
+                <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
+                  <div><div className="text-xs text-stone-500">דמי קמפ</div><div className="font-semibold">{money2(due)}</div></div>
+                  <div><div className="text-xs text-stone-500">שילמתי</div><div className="font-semibold">{money2(paid)}</div></div>
+                  <div><div className="text-xs text-stone-500">הוצאתי מהכיס</div><div className="font-semibold">{money2(fronted)}</div></div>
+                  <div><div className="text-xs text-stone-500">חלקי בעודף</div><div className="font-semibold">{money2(ledger?.surplus_share)}</div></div>
+                  <div className={`rounded-lg p-2 ${balance > 0 ? "bg-red-50" : balance < 0 ? "bg-green-50" : "bg-stone-50"}`}>
+                    <div className="text-xs text-stone-500">{balance > 0 ? "נשאר לשלם" : balance < 0 ? "מגיע לי החזר" : "מאוזן"}</div>
+                    <div className={`font-bold ${balance > 0 ? "text-red-700" : balance < 0 ? "text-green-700" : ""}`}>{money2(Math.abs(balance))}</div>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-stone-500">החשבונות של האירוע נסגרו: ההוצאות מהכיס והחלק שלך בעודף כבר מחושבים כאן.</p>
+              </>
+            )}
+            {toPay > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-orange-300 bg-orange-50 p-3 text-sm">
-                {ev?.payment_link && <a href={ev.payment_link} target="_blank" rel="noopener" className="btn-brand rounded-lg px-3.5 py-1.5">שלם {money2(Math.max(0, balance - pendingSum))} ב‑{ev.payment_link_label ?? "PayBox"}</a>}
+                {ev?.payment_link && Math.max(0, toPay - pendingSum) > 0 && <a href={ev.payment_link} target="_blank" rel="noopener" className="btn-brand rounded-lg px-3.5 py-1.5">שלם {money2(toPay - pendingSum)} ב‑{ev.payment_link_label ?? "PayBox"}</a>}
                 {pendingSum > 0 ? (
                   <span className="text-stone-600">דיווחת על {money2(pendingSum)} — ממתין לאישור הגזבר.</span>
                 ) : (
                   <form action={reportPayment} className="flex items-center gap-2">
-                    <input type="hidden" name="amount" value={balance.toFixed(2)} />
+                    <input type="hidden" name="amount" value={toPay.toFixed(2)} />
                     <span className="text-stone-600">שילמת?</span>
-                    <button className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 font-bold hover:bg-stone-100">שילמתי {money2(balance)}</button>
+                    <button className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 font-bold hover:bg-stone-100">שילמתי {money2(toPay)}</button>
                   </form>
                 )}
               </div>
             )}
-            {!ledger?.due && <p className="mt-2 text-xs text-stone-500">דמי הקמפ ייקבעו כשהמנהל יאשר את תרחיש התקציב של השנה.</p>}
-            <p className="mt-2 text-xs text-stone-500">העודף (הכנסות − הוצאות) מתחלק בסוף האירוע בין מי שהגיע. הוצאות מהכיס נספרות אחרי אישור המנהל.</p>
+            {!due && <p className="mt-2 text-xs text-stone-500">דמי הקמפ ייקבעו כשהמנהל יאשר את תרחיש התקציב של השנה.</p>}
           </Card>
         )}
 

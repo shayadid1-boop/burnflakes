@@ -5,7 +5,7 @@ import { myDepartments, STATUS_HE, PAID_FROM_HE, METHOD_HE } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card, Kpi, Btn, inputCls } from "@/components/ui";
 import { money, money2, num } from "@/lib/format";
-import { setExpenseStatus, recordPayment, recordPayout, recordIncome, setPaymentStatus, setPaymentLink } from "@/app/money-actions";
+import { setExpenseStatus, recordPayment, recordPayout, recordIncome, setPaymentStatus, setPaymentLink, setSettled } from "@/app/money-actions";
 
 type Ledger = { event_member_id: string; first_name: string; last_name: string | null; tier: string; participation_share: number; due: number; paid: number; fronted: number; paid_out: number; surplus_share: number; balance: number };
 
@@ -22,15 +22,19 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
     supabase.from("funds").select("id, key, name_he, from_members").eq("event_id", me.eventId),
     supabase.from("payments").select("id, amount, method, paid_at, event_member_id, funds(name_he)").eq("event_id", me.eventId).eq("status", "confirmed").order("paid_at", { ascending: false }).limit(15),
     supabase.from("payments").select("id, amount, paid_at, event_member_id, notes").eq("event_id", me.eventId).eq("status", "pending").order("paid_at"),
-    supabase.from("events").select("payment_link, payment_link_label").eq("id", me.eventId).maybeSingle(),
+    supabase.from("events").select("payment_link, payment_link_label, settled").eq("id", me.eventId).maybeSingle(),
     supabase.from("incomes").select("id, source_name, amount, received_at, funds(name_he)").eq("event_id", me.eventId).order("received_at", { ascending: false }).limit(15),
     myDepartments(me.eventId),
   ]);
   const ledger = ((ledgerRows ?? []) as Ledger[]).filter((r) => Number(r.due) > 0 || Number(r.paid) > 0 || Number(r.fronted) > 0);
-  const shown = ledger.filter((r) => filter === "owe" ? Number(r.balance) > 0 : filter === "refund" ? Number(r.balance) < 0 : true);
+  // before "חישוב החזרים" a member simply owes the dues; refunds only exist after it
+  const settled = ev?.settled === true;
+  const owes = (r: Ledger) => settled ? Math.max(0, Number(r.balance)) : Math.max(0, Number(r.due) - Number(r.paid));
+  const refundOf = (r: Ledger) => settled ? Math.max(0, -Number(r.balance)) : 0;
+  const shown = ledger.filter((r) => filter === "owe" ? owes(r) > 0 : filter === "refund" ? refundOf(r) > 0 : true);
   const memberFunds = (funds ?? []).filter((f) => f.from_members);
   const nameOf = new Map(ledger.map((r) => [r.event_member_id, `${r.first_name} ${r.last_name ?? ""}`.trim()]));
-  const totals = ledger.reduce((t, r) => ({ due: t.due + Number(r.due), paid: t.paid + Number(r.paid), fronted: t.fronted + Number(r.fronted), owe: t.owe + Math.max(0, Number(r.balance)), refund: t.refund + Math.max(0, -Number(r.balance)) }), { due: 0, paid: 0, fronted: 0, owe: 0, refund: 0 });
+  const totals = ledger.reduce((t, r) => ({ due: t.due + Number(r.due), paid: t.paid + Number(r.paid), fronted: t.fronted + Number(r.fronted), owe: t.owe + owes(r), refund: t.refund + refundOf(r) }), { due: 0, paid: 0, fronted: 0, owe: 0, refund: 0 });
 
   return (
     <>
@@ -43,7 +47,7 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
           <Kpi label="נגבה" value={money(totals.paid)} />
           <Kpi label="הוצאות מהכיס של חברים" value={money(totals.fronted)} />
           <Kpi label="עוד לא שולם" value={money(totals.owe)} tone="bad" />
-          <Kpi label="החזרים לביצוע" value={money(totals.refund)} tone="good" />
+          <Kpi label="החזרים לביצוע" value={settled ? money(totals.refund) : "אחרי חישוב"} tone="good" />
         </div>
 
         {(pendingPayments ?? []).length > 0 && (
@@ -84,9 +88,24 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
           </Card>
         )}
 
+        <Card title="חישוב החזרים" className={settled ? "border-green-300" : ""}>
+          {settled ? (
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <span>ההחזרים חושבו: לכל חבר נכנסו ההוצאות מהכיס והחלק שלו בעודף, וכל אחד רואה את זה במסך שלו.</span>
+              <form action={setSettled}><input type="hidden" name="settled" value="0" /><Btn variant="ghost" type="submit">בטל חישוב (חזרה לגביית דמי קמפ)</Btn></form>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <span className="text-stone-600">כרגע כל חבר רואה רק את דמי הקמפ ומה ששילם. אחרי האירוע, כשכל ההוצאות נרשמו ואושרו — לוחצים כאן, והמערכת מחשבת לכל אחד כמה מגיע לו בחזרה.</span>
+              <form action={setSettled}><input type="hidden" name="settled" value="1" /><Btn type="submit">חישוב החזרים</Btn></form>
+            </div>
+          )}
+          {!settled && (pending ?? []).length > 0 && <p className="mt-2 text-sm text-amber-700">יש עוד {num(pending!.length)} הוצאות שממתינות לאישור — כדאי לאשר אותן לפני החישוב.</p>}
+        </Card>
+
         <Card title="ספר החשבונות של החברים">
           <div className="mb-2 flex gap-2 text-sm">
-            {[["all", "כולם"], ["owe", "חייבים"], ["refund", "מגיע להם החזר"]].map(([k, l]) => (
+            {([["all", "כולם"], ["owe", "חייבים"], ...(settled ? [["refund", "מגיע להם החזר"]] : [])] as string[][]).map(([k, l]) => (
               <a key={k} href={`/treasury?filter=${k}`} className={`rounded-md px-2 py-1 ${filter === k ? "bg-stone-800 text-white" : "bg-stone-100"}`}>{l}</a>
             ))}
           </div>
@@ -94,16 +113,16 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-stone-500"><tr className="text-right">
-                <th className="p-2 font-normal">חבר</th><th className="p-2 font-normal">חוב</th><th className="p-2 font-normal">שילם</th><th className="p-2 font-normal">מהכיס</th><th className="p-2 font-normal">חלק בעודף</th><th className="p-2 font-normal">הוחזר</th><th className="p-2 font-normal">יתרה</th><th className="p-2 font-normal"></th>
+                <th className="p-2 font-normal">חבר</th><th className="p-2 font-normal">חוב</th><th className="p-2 font-normal">שילם</th><th className="p-2 font-normal">מהכיס</th>{settled && <><th className="p-2 font-normal">חלק בעודף</th><th className="p-2 font-normal">הוחזר</th></>}<th className="p-2 font-normal">{settled ? "יתרה" : "נשאר לשלם"}</th><th className="p-2 font-normal"></th>
               </tr></thead>
               <tbody>
                 {shown.map((r) => {
-                  const b = Number(r.balance);
+                  const b = settled ? Number(r.balance) : Math.max(0, Number(r.due) - Number(r.paid));
                   return (
                     <tr key={r.event_member_id} className="border-t border-stone-100">
                       <td className="p-2 whitespace-nowrap">{r.first_name} {r.last_name}{Number(r.participation_share) !== 1 && <span className="text-xs text-stone-500"> ×{r.participation_share}</span>}</td>
                       <td className="p-2 tabular-nums">{money2(r.due)}</td><td className="p-2 tabular-nums">{money2(r.paid)}</td><td className="p-2 tabular-nums">{money2(r.fronted)}</td>
-                      <td className="p-2 tabular-nums">{money2(r.surplus_share)}</td><td className="p-2 tabular-nums">{money2(r.paid_out)}</td>
+                      {settled && <><td className="p-2 tabular-nums">{money2(r.surplus_share)}</td><td className="p-2 tabular-nums">{money2(r.paid_out)}</td></>}
                       <td className={`p-2 tabular-nums font-semibold ${b > 0 ? "text-red-700" : b < 0 ? "text-green-700" : ""}`}>{b > 0 ? `חייב ${money2(b)}` : b < 0 ? `להחזיר ${money2(-b)}` : "מאוזן"}</td>
                       <td className="p-2">
                         {b < 0 && (
