@@ -4,12 +4,16 @@ import { myDepartments, STATUS_HE, STATUS_TONE } from "@/lib/data";
 import { Nav } from "@/components/nav";
 import { Card, Pill } from "@/components/ui";
 import { ExpenseForm } from "@/components/expense-form";
+import { ReportPaymentButton } from "@/components/report-payment-button";
 import { money, money2 } from "@/lib/format";
 import { deleteExpense, reportPayment } from "@/app/money-actions";
 
 const ROLE_HE = { admin: "מנהל", dept_lead: "ראש מחלקה", member: "חבר" } as const;
 
-export default async function MePage() {
+export default async function MePage({ searchParams }: { searchParams: Promise<{ pay?: string; pay_error?: string }> }) {
+  const sp = await searchParams;
+  const payError = sp.pay_error ? sp.pay_error.slice(0, 200) : "";
+  const paySent = sp.pay === "sent";
   const me = await requireMember();
   const supabase = await createClient();
   const depts = me.eventId ? await myDepartments(me.eventId) : [];
@@ -103,14 +107,12 @@ export default async function MePage() {
                 {pendingSum > 0 ? (
                   <span className="text-stone-600">דיווחת על {money2(pendingSum)} — ממתין לאישור הגזבר.</span>
                 ) : (
-                  <form action={reportPayment} className="flex items-center gap-2">
-                    <input type="hidden" name="amount" value={toPay.toFixed(2)} />
-                    <span className="text-stone-600">שילמת?</span>
-                    <button className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 font-bold hover:bg-stone-100">שילמתי {money2(toPay)}</button>
-                  </form>
+                  <ReportPaymentButton action={reportPayment} amount={toPay} label={`שילמתי ${money2(toPay)}`} />
                 )}
               </div>
             )}
+            {payError && <p className="mt-2 rounded-lg bg-red-50 p-2 text-sm text-red-700">{payError}</p>}
+            {paySent && pendingSum > 0 && <p className="mt-2 rounded-lg bg-green-50 p-2 text-sm text-green-800">הדיווח נשלח לגזבר. אין צורך ללחוץ שוב — הוא יאשר כשיראה שהכסף הגיע.</p>}
             {!due && <p className="mt-2 text-xs text-stone-500">דמי הקמפ ייקבעו כשהמנהל יאשר את תרחיש התקציב של השנה.</p>}
           </Card>
         )}

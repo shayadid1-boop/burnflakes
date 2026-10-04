@@ -114,14 +114,16 @@ export async function recordIncome(formData: FormData) {
   revalidatePath(back);
 }
 
-/** Member: "I paid" — creates a pending payment for what they owe; the treasurer confirms it. */
+/** Member: "I paid" — creates a pending payment for what they still owe on the dues; the treasurer confirms it.
+ *  The database refuses a second report while one is waiting, and anything above what is left to pay. */
 export async function reportPayment(formData: FormData) {
   const me = await requireMember();
   if (!me.eventId) throw new Error("no event");
   const supabase = await createClient();
   const { error } = await supabase.rpc("report_payment", { p_event: me.eventId, p_amount: Number(formData.get("amount")), p_notes: String(formData.get("notes") || "") || null });
-  fail(error);
   revalidatePath("/me"); revalidatePath("/treasury");
+  // show the reason on the page instead of an error screen
+  redirect(error ? `/me?pay_error=${encodeURIComponent(error.message)}` : "/me?pay=sent");
 }
 
 /** Treasurer: confirm or cancel a pending payment a member reported. */
