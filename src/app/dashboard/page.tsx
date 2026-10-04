@@ -52,7 +52,7 @@ export default async function DashboardPage() {
             <ul className="space-y-2 text-sm">
               {overDepts.map((d) => <li key={d.slug} className="rounded-md bg-red-50 p-2 text-red-800">🔴 {d.department} בחריגה: {money(d.actual)} מתוך {money(d.planned)}</li>)}
               {(pending ?? []).length > 0 && <li className="rounded-md bg-amber-50 p-2 text-amber-800">🟡 {num(pending!.length)} הוצאות ממתינות לאישור ({money(pending!.reduce((s, x) => s + Number(x.amount), 0))}) — <Link href="/treasury" className="underline">לאישור</Link></li>}
-              {notPaid.length > 0 && <li className="rounded-md bg-amber-50 p-2 text-amber-800">🟡 {num(notPaid.length)} חברים לא השלימו תשלום — <Link href="/treasury?filter=owe" className="underline">רשימה</Link></li>}
+              {notPaid.length > 0 && <li className="rounded-md bg-amber-50 p-2 text-amber-800">🟡 {num(notPaid.length)} חברים לא השלימו תשלום — <Link href="/treasury?filter=unpaid" className="underline">רשימה</Link></li>}
               {refunds.length > 0 && <li className="rounded-md bg-green-50 p-2 text-green-800">🟢 {num(refunds.length)} החזרים לביצוע ({money(refunds.reduce((s, r) => s - Number(r.balance), 0))}) — <Link href="/treasury?filter=refund" className="underline">רשימה</Link></li>}
               {overDepts.length + (pending ?? []).length + notPaid.length + refunds.length === 0 && <li className="text-stone-500">הכל שקט 🙂</li>}
             </ul>

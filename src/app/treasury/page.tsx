@@ -31,7 +31,11 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
   const settled = ev?.settled === true;
   const owes = (r: Ledger) => settled ? Math.max(0, Number(r.balance)) : Math.max(0, Number(r.due) - Number(r.paid));
   const refundOf = (r: Ledger) => settled ? Math.max(0, -Number(r.balance)) : 0;
-  const shown = ledger.filter((r) => filter === "owe" ? owes(r) > 0 : filter === "refund" ? refundOf(r) > 0 : true);
+  // paid / not paid = the camp dues only (confirmed payments vs. what is due); a report still waiting for "התקבל" is not paid yet
+  const paidDues = (r: Ledger) => Number(r.due) > 0 && Number(r.paid) >= Number(r.due);
+  const pendingOf = new Set((pendingPayments ?? []).map((p) => p.event_member_id));
+  const match = (r: Ledger, f: string) => f === "paid" ? paidDues(r) : f === "unpaid" || f === "owe" ? Number(r.due) > 0 && !paidDues(r) : f === "refund" ? refundOf(r) > 0 : true;
+  const shown = ledger.filter((r) => match(r, filter));
   const memberFunds = (funds ?? []).filter((f) => f.from_members);
   const nameOf = new Map(ledger.map((r) => [r.event_member_id, `${r.first_name} ${r.last_name ?? ""}`.trim()]));
   const totals = ledger.reduce((t, r) => ({ due: t.due + Number(r.due), paid: t.paid + Number(r.paid), fronted: t.fronted + Number(r.fronted), owe: t.owe + owes(r), refund: t.refund + refundOf(r) }), { due: 0, paid: 0, fronted: 0, owe: 0, refund: 0 });
@@ -105,10 +109,16 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
 
         <Card title="ספר החשבונות של החברים">
           <div className="mb-2 flex gap-2 text-sm">
-            {([["all", "כולם"], ["owe", "חייבים"], ...(settled ? [["refund", "מגיע להם החזר"]] : [])] as string[][]).map(([k, l]) => (
-              <a key={k} href={`/treasury?filter=${k}`} className={`rounded-md px-2 py-1 ${filter === k ? "bg-stone-800 text-white" : "bg-stone-100"}`}>{l}</a>
-            ))}
+            {([["all", "כולם"], ["paid", "שילמו"], ["unpaid", "לא שילמו"], ...(settled ? [["refund", "מגיע להם החזר"]] : [])] as string[][]).map(([k, l]) => {
+              const on = filter === k || (k === "unpaid" && filter === "owe");
+              return (
+                <a key={k} href={`/treasury?filter=${k}`} className={`rounded-md px-2 py-1 font-bold ${on ? "bg-stone-800 text-white" : "bg-stone-100"}`}>
+                  {l} ({num(ledger.filter((r) => match(r, k)).length)})
+                </a>
+              );
+            })}
           </div>
+          {ledger.length > 0 && shown.length === 0 && <p className="text-sm text-stone-500">אין חברים ברשימה הזו.</p>}
           {ledger.length === 0 && <p className="text-sm text-stone-500">אין עדיין חיובים — אשר תרחיש תקציב כדי לקבוע דמי קמפ.</p>}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -120,7 +130,7 @@ export default async function TreasuryPage({ searchParams }: { searchParams: Pro
                   const b = settled ? Number(r.balance) : Math.max(0, Number(r.due) - Number(r.paid));
                   return (
                     <tr key={r.event_member_id} className="border-t border-stone-100">
-                      <td className="p-2 whitespace-nowrap">{r.first_name} {r.last_name}{Number(r.participation_share) !== 1 && <span className="text-xs text-stone-500"> ×{r.participation_share}</span>}</td>
+                      <td className="p-2 whitespace-nowrap">{r.first_name} {r.last_name}{Number(r.participation_share) !== 1 && <span className="text-xs text-stone-500"> ×{r.participation_share}</span>}{pendingOf.has(r.event_member_id) && <span className="mr-1 rounded-full bg-amber-50 px-1.5 text-[11px] text-amber-800">דיווח שילם — ממתין לאישור</span>}</td>
                       <td className="p-2 tabular-nums">{money2(r.due)}</td><td className="p-2 tabular-nums">{money2(r.paid)}</td><td className="p-2 tabular-nums">{money2(r.fronted)}</td>
                       {settled && <><td className="p-2 tabular-nums">{money2(r.surplus_share)}</td><td className="p-2 tabular-nums">{money2(r.paid_out)}</td></>}
                       <td className={`p-2 tabular-nums font-semibold ${b > 0 ? "text-red-700" : b < 0 ? "text-green-700" : ""}`}>{b > 0 ? `חייב ${money2(b)}` : b < 0 ? `להחזיר ${money2(-b)}` : "מאוזן"}</td>
