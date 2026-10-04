@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const inputCls = "w-full rounded-lg border border-stone-300 bg-white p-3";
@@ -10,12 +10,18 @@ const inputCls = "w-full rounded-lg border border-stone-300 bg-white p-3";
  * link by email; after that link they set a password (/set-password) and use it from then on.
  */
 export default function LoginPage() {
+  return <Suspense><LoginForm /></Suspense>;
+}
+
+function LoginForm() {
   const router = useRouter();
   const [mode, setMode] = useState<"password" | "link">("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "busy" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
+  // a link that could not be used comes back here as ?error=link — say so instead of showing a blank form
+  const linkFailed = useSearchParams().get("error") === "link" && status === "idle";
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,6 +58,11 @@ export default function LoginPage() {
         </div>
       ) : (
         <form onSubmit={submit} className="space-y-4">
+          {linkFailed && (
+            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              הקישור מהמייל לא עבד — כנראה שכבר השתמשו בו, שעבר יותר מדי זמן, או שנפתח בדפדפן אחר מזה שבו ביקשת אותו. בקש קישור חדש למטה ופתח אותו מיד.
+            </p>
+          )}
           <label className="block space-y-1">
             <span className="text-sm text-stone-600">המייל שרשום אצלנו בקמפ</span>
             <input type="email" required dir="ltr" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="you@example.com" />
